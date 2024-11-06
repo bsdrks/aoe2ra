@@ -17,3 +17,6 @@ target/
 #.idea/
 
 .DS_Store
+
+# ad-hoc testing assets
+recs/

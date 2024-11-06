@@ -33,8 +33,10 @@
 // Rustdoc lints
 #![deny(rustdoc::all)]
 // Overwrites
-#![allow(clippy::large_stack_frames, clippy::module_name_repetitions)]
+#![allow(clippy::module_name_repetitions)]
 
+pub mod body;
+pub mod body_meta;
 pub mod check_flags;
 pub mod formation_type;
 pub mod operation;

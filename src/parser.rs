@@ -1,4 +1,6 @@
 use crate::{
+    body::Body,
+    body_meta::BodyMeta,
     check_flags::check_flags,
     formation_type::FormationType,
     operation::{
@@ -69,11 +71,7 @@ impl Parser {
         Self { cursor: 0, raw }
     }
 
-    pub fn parse(&mut self) -> Option<Vec<Operation>> {
-        let header_length = self.parse_u32();
-
-        self.cursor = header_length as usize;
-
+    fn parse_body_meta(&mut self) -> BodyMeta {
         let next = self.peek_u32();
         let log_version = (next != 500).then(|| self.parse_u32());
         let checksum_interval = self.parse_u32();
@@ -82,64 +80,56 @@ impl Parser {
         let reveal_map = self.parse_u32();
         let use_sequence_numbers = self.parse_u32();
         let number_of_chapters = self.parse_u32();
-        let aok_or_de = self.peek_u32();
+        let aok = self.peek_bool_u32();
 
-        println!("{log_version:?}");
-        println!("{checksum_interval:?}");
-        println!("{multiplayer}");
-        println!("{rec_owner}");
-        println!("{reveal_map}");
-        println!("{use_sequence_numbers}");
-        println!("{number_of_chapters}");
-        println!("{aok_or_de}");
+        if aok {
+            self.skip_u8s(4);
+            let p = self.peek_u32();
 
-        let _m = (aok_or_de == 0).then(|| {
-            let _v = self.parse_u32();
-            let _aok = self.peek_u32();
-            let _z = (aok_or_de != 2).then(|| self.parse_u32s(2));
-        });
+            if p != 2 {
+                self.skip_u8s(8);
+            }
+        }
 
+        BodyMeta {
+            log_version,
+            checksum_interval,
+            multiplayer: multiplayer != 0,
+            rec_owner,
+            reveal_map,
+            use_sequence_numbers: use_sequence_numbers != 0,
+            number_of_chapters,
+            aok,
+        }
+    }
+
+    fn parse_operations(&mut self) -> Vec<Operation> {
         let mut operations = Vec::new();
 
         while self.cursor < self.raw.len() {
             let operation = self.parse_operation();
 
             match operation {
-                Some(Operation::Chat(Chat { ref text })) => {
-                    if text == "\u{3}" {
-                        break;
-                    }
+                Some(Operation::Chat(Chat { ref text }))
+                    if text == "\u{3}" =>
+                {
+                    break;
                 }
-                None
-                | Some(
-                    Operation::Sync(_)
-                    | Operation::ViewLock(_)
-                    | Operation::Unknown,
-                ) => {
-                    continue;
-                }
+                Some(operation) => operations.push(operation),
                 _ => {}
-            }
-
-            if matches!(
-                operation,
-                None | Some(
-                    Operation::Sync(_)
-                        | Operation::ViewLock(_)
-                        | Operation::Unknown
-                )
-            ) {
-                continue;
-            }
-
-            println!("{operation:?}");
-
-            if let Some(operation) = operation {
-                operations.push(operation);
             }
         }
 
-        Some(operations)
+        operations
+    }
+
+    pub fn parse_body(&mut self) -> Body {
+        self.cursor = self.parse_u32() as usize;
+
+        Body {
+            meta: self.parse_body_meta(),
+            operations: self.parse_operations(),
+        }
     }
 
     fn parse_operation(&mut self) -> Option<Operation> {
@@ -730,7 +720,7 @@ impl Parser {
     fn parse_resign(&mut self) -> Operation {
         let player_id = self.parse_u8();
         let player_num = self.parse_u8();
-        let disconnected = self.parse_bool();
+        let disconnected = self.parse_bool_u8();
 
         Operation::Action(Action::Resign(Resign {
             player_id,
@@ -842,7 +832,7 @@ impl Parser {
 
     // Parse primitive values
 
-    fn parse_bool(&mut self) -> bool {
+    fn parse_bool_u8(&mut self) -> bool {
         self.parse_u8() != 0
     }
 
@@ -980,6 +970,10 @@ impl Parser {
             self.raw[self.cursor + 2],
             self.raw[self.cursor + 3],
         ])
+    }
+
+    fn peek_bool_u32(&self) -> bool {
+        self.peek_u32() != 0
     }
 
     fn peek_u8s(&self, count: usize) -> Vec<u8> {
