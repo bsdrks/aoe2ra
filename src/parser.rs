@@ -832,6 +832,15 @@ impl Parser {
 
     // Parse primitive values
 
+    fn take_4(&self) -> [u8; 4] {
+        [
+            self.raw[self.cursor],
+            self.raw[self.cursor + 1],
+            self.raw[self.cursor + 2],
+            self.raw[self.cursor + 3],
+        ]
+    }
+
     fn parse_bool_u8(&mut self) -> bool {
         match self.parse_u8() {
             0x00 => false,
@@ -841,12 +850,7 @@ impl Parser {
     }
 
     fn parse_f32(&mut self) -> f32 {
-        let mut value = f32::from_le_bytes([
-            self.raw[self.cursor],
-            self.raw[self.cursor + 1],
-            self.raw[self.cursor + 2],
-            self.raw[self.cursor + 3],
-        ]);
+        let mut value = f32::from_le_bytes(self.take_4());
 
         if value.abs() < f32::EPSILON {
             value = 0.0;
@@ -869,12 +873,17 @@ impl Parser {
             return None;
         }
 
-        Some(f32::from_le_bytes([
-            self.raw[self.cursor],
-            self.raw[self.cursor + 1],
-            self.raw[self.cursor + 2],
-            self.raw[self.cursor + 3],
-        ]))
+        let value = f32::from_le_bytes([a, b, c, d]);
+
+        if value.abs() < f32::EPSILON {
+            self.cursor += 4;
+
+            return Some(0.0);
+        }
+
+        self.cursor += 4;
+
+        Some(value)
     }
 
     fn parse_f32s(&mut self, count: usize) -> Vec<f32> {
@@ -882,12 +891,7 @@ impl Parser {
     }
 
     fn parse_i32(&mut self) -> i32 {
-        let value = i32::from_le_bytes([
-            self.raw[self.cursor],
-            self.raw[self.cursor + 1],
-            self.raw[self.cursor + 2],
-            self.raw[self.cursor + 3],
-        ]);
+        let value = i32::from_le_bytes(self.take_4());
 
         self.cursor += 4;
 
@@ -906,12 +910,7 @@ impl Parser {
     }
 
     fn parse_u32(&mut self) -> u32 {
-        let value = u32::from_le_bytes([
-            self.raw[self.cursor],
-            self.raw[self.cursor + 1],
-            self.raw[self.cursor + 2],
-            self.raw[self.cursor + 3],
-        ]);
+        let value = self.peek_u32();
 
         self.cursor += 4;
 
@@ -963,21 +962,11 @@ impl Parser {
     }
 
     fn peek_i32(&self) -> i32 {
-        i32::from_le_bytes([
-            self.raw[self.cursor],
-            self.raw[self.cursor + 1],
-            self.raw[self.cursor + 2],
-            self.raw[self.cursor + 3],
-        ])
+        i32::from_le_bytes(self.take_4())
     }
 
     fn peek_u32(&self) -> u32 {
-        u32::from_le_bytes([
-            self.raw[self.cursor],
-            self.raw[self.cursor + 1],
-            self.raw[self.cursor + 2],
-            self.raw[self.cursor + 3],
-        ])
+        u32::from_le_bytes(self.take_4())
     }
 
     fn peek_u8s(&self, count: usize) -> Vec<u8> {
