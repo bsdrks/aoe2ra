@@ -7,5 +7,6 @@ license = "MIT"
 readme = "README.md"
 keywords = ["aoe2", "record", "analysis"]
 categories = ["game-tools"]
+repository = "https://github.com/bsdrks/aoe2ra.git"
 
 [dependencies]
