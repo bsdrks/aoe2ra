@@ -1,0 +1,11 @@
+[package]
+name = "aoe2ra"
+version = "0.1.0"
+edition = "2021"
+description = "Age of Empires 2 Record Analysis"
+license = "MIT"
+readme = "README.md"
+keywords = ["aoe2", "record", "analysis"]
+categories = ["game-tools"]
+
+[dependencies]
