@@ -71,6 +71,15 @@ impl Parser {
         Self { cursor: 0, raw }
     }
 
+    pub fn parse_body(&mut self) -> Body {
+        self.cursor = self.parse_u32() as usize;
+
+        Body {
+            meta: self.parse_body_meta(),
+            operations: self.parse_operations(),
+        }
+    }
+
     fn parse_body_meta(&mut self) -> BodyMeta {
         let next = self.peek_u32();
         let log_version = (next != 500).then(|| self.parse_u32());
@@ -123,18 +132,8 @@ impl Parser {
         operations
     }
 
-    pub fn parse_body(&mut self) -> Body {
-        self.cursor = self.parse_u32() as usize;
-
-        Body {
-            meta: self.parse_body_meta(),
-            operations: self.parse_operations(),
-        }
-    }
-
     fn parse_operation(&mut self) -> Option<Operation> {
-        let operation_type_u32 = self.parse_u32();
-        let operation_type = OperationType::from(operation_type_u32);
+        let operation_type = self.parse_operation_type();
 
         match operation_type {
             OperationType::Action => Some(self.parse_action()),
@@ -145,13 +144,17 @@ impl Parser {
         }
     }
 
+    fn parse_operation_type(&mut self) -> OperationType {
+        let operation_type_u32 = self.parse_u32();
+
+        OperationType::from(operation_type_u32)
+    }
+
     fn parse_action(&mut self) -> Operation {
-        println!("a {}", self.cursor);
         let length = self.parse_u32();
         let cursor_next = self.cursor + 4 + length as usize;
         let action_type_u8 = self.parse_u8();
         let action_type = ActionType::from(action_type_u8);
-        println!("b {}", self.cursor);
 
         let action = match action_type {
             ActionType::AddAttribute => self.parse_add_attribute(),
@@ -566,7 +569,6 @@ impl Parser {
         let x = self.parse_f32();
         let y = self.parse_f32();
         let selected = self.parse_u8();
-        println!("{selected}");
         self.skip_u8s(3);
         let next = self.peek_u8s(4);
         let flags = check_flags(&next).then(|| self.parse_u8s(4));
@@ -745,9 +747,7 @@ impl Parser {
 
     fn parse_stance(&mut self) -> Operation {
         let selected = self.parse_u8();
-        println!("{selected}");
         let stance_type_u8 = self.parse_u8();
-        println!("{stance_type_u8}");
         let stance_type = StanceType::from(stance_type_u8);
         let unit_ids = self.parse_u32s(selected as usize);
 
@@ -833,7 +833,11 @@ impl Parser {
     // Parse primitive values
 
     fn parse_bool_u8(&mut self) -> bool {
-        self.parse_u8() != 0
+        match self.parse_u8() {
+            0x00 => false,
+            0x01 => true,
+            n => panic!("0x00 or 0x01, found: 0x{n:02x}"),
+        }
     }
 
     fn parse_f32(&mut self) -> f32 {
@@ -954,6 +958,10 @@ impl Parser {
 
     // Peek primitive values
 
+    fn peek_bool_u32(&self) -> bool {
+        self.peek_u32() != 0
+    }
+
     fn peek_i32(&self) -> i32 {
         i32::from_le_bytes([
             self.raw[self.cursor],
@@ -972,11 +980,43 @@ impl Parser {
         ])
     }
 
-    fn peek_bool_u32(&self) -> bool {
-        self.peek_u32() != 0
-    }
-
     fn peek_u8s(&self, count: usize) -> Vec<u8> {
         self.raw[self.cursor..self.cursor + count].to_vec()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_bool_u8_false() {
+        let mut parser = Parser {
+            cursor: 0,
+            raw: vec![0x00],
+        };
+
+        assert!(!parser.parse_bool_u8());
+    }
+
+    #[test]
+    fn test_parse_bool_u8_true() {
+        let mut parser = Parser {
+            cursor: 0,
+            raw: vec![0x01],
+        };
+
+        assert!(parser.parse_bool_u8());
+    }
+
+    #[test]
+    #[should_panic(expected = "0x00 or 0x01, found: 0x02")]
+    fn test_parse_bool_panic() {
+        let mut parser = Parser {
+            cursor: 0,
+            raw: vec![0x02],
+        };
+
+        let _ = parser.parse_bool_u8();
     }
 }
