@@ -41,7 +41,6 @@ use crate::{
             Stance,
             Stop,
             ToggleGate,
-            Unknown0x23,
             Unknown0x25,
             Unknown0x29,
             Unknown0x82,
@@ -98,9 +97,13 @@ impl Parser {
     }
 
     fn parse_action(&mut self) -> Operation {
+        println!();
+        println!("{}", self.cursor);
         let length = self.parse_usize_u32();
+        println!("{length}");
         let cursor_next = self.cursor + length;
         let action_type = self.parse_action_type();
+        println!("{action_type:?}");
 
         let action = match action_type {
             ActionType::AddAttribute => self.parse_add_attribute(),
@@ -146,7 +149,6 @@ impl Parser {
             ActionType::ToggleGate => self.parse_toggle_gate(),
             ActionType::TownBell => unimplemented!("TownBell"),
             ActionType::Tribute => unimplemented!("Tribute"),
-            ActionType::Unknown0x23 => self.parse_unknown_0x23(),
             ActionType::Unknown0x25 => self.parse_unknown_0x25(),
             ActionType::Unknown0x29 => self.parse_unknown_0x29(),
             ActionType::Unknown0x82 => self.parse_unknown_0x82(),
@@ -154,6 +156,8 @@ impl Parser {
             ActionType::Wall => self.parse_wall(length),
             ActionType::Waypoint => self.parse_waypoint(),
         };
+
+        println!("{action:?}");
 
         assert!(
             self.cursor != cursor_next,
@@ -410,29 +414,22 @@ impl Parser {
     // Examples:
     // 01000000_14000000_81011000_01000000_00006D00_53000100_B61D0000_4A040000
     // 01000000_14000000_81011000_01000000_00006D00_53000100_B61D0000_92060000
-    // 01000000_14000000_81021000_01000000_00005700_04000100_A4380000_C4B61300
     fn parse_de_queue(&mut self) -> Operation {
+        println!("parsing de_queue: {}", self.cursor);
         let player_id = self.parse_u8();
-        let unknown_u8_1 = self.parse_u8();
-        let unknown_u8_2 = self.parse_u8();
-        let selected = self.parse_usize_u32();
-        let unknown_u16_1 = self.parse_u16();
-        let unknown_u16_2 = self.parse_u16();
-        let unknown_u16_3 = self.parse_u16();
-        let unknown_u16_4 = self.parse_u16();
-        let unknown_u32_1 = self.parse_u32();
-        let unit_ids = self.parse_u32s(selected);
+        let building_type = self.parse_u16();
+        let selected = self.parse_usize_u8();
+        let unit_type = self.parse_u16();
+        let queue_amount = self.parse_u8();
+        self.skip_u8();
+        let building_ids = self.parse_u32s(selected);
 
         Operation::Action(Action::DeQueue(DeQueue {
             player_id,
-            unknown_u8_1,
-            unknown_u8_2,
-            unknown_u16_1,
-            unknown_u16_2,
-            unknown_u16_3,
-            unknown_u16_4,
-            unknown_u32_1,
-            unit_ids,
+            building_type,
+            unit_type,
+            queue_amount,
+            building_ids,
         }))
     }
 
@@ -544,15 +541,12 @@ impl Parser {
         }))
     }
 
-    // Examples:
     // 01000000_1D000000_78011900_01000000_AB8A7C42_5515A741_FFFFFFFF_FFFFFFFF_00B61D00_00B4DC02_00
-    // 01000000_1D000000_78021900_01000000_0000A742_00000E42_FFFFFFFF_FFFFFFFF_00A43800_00991517_00
-    // 01000000_1D000000_78021900_01000000_0000BF42_0000C441_FFFFFFFF_FFFFFFFF_00843800_00A5F318_00
     fn parse_gather_point(&mut self) -> Operation {
-        let player_id = self.parse_u8();
+        let selected = self.parse_usize_u8();
         let unknown_u8_1 = self.parse_u8();
         let unknown_u8_2 = self.parse_u8();
-        let selected = self.parse_usize_u32();
+        let unknown_u32_1 = self.parse_u32();
         let x = self.parse_f32();
         let y = self.parse_f32();
         let unknown_u32_2 = self.parse_u32_opt();
@@ -562,9 +556,9 @@ impl Parser {
         let unit_ids = self.parse_u32s(selected);
 
         Operation::Action(Action::GatherPoint(GatherPoint {
-            player_id,
             unknown_u8_1,
             unknown_u8_2,
+            unknown_u32_1,
             x,
             y,
             unknown_u32_2,
@@ -649,32 +643,34 @@ impl Parser {
 
     // Examples:
     // 01000000_28000000_03012400_FFFFFFFF_55154942_55D5C741_04000000_01010000_F9360000_F7360000_F8360000_F6360000_0E190000
-    // 01000000_1C000000_03011800_FFFFFFFF_55C59D42_00709442_01000000_01010000_5C380000_F3681700
-    // 01000000_18000000_03011400_FFFFFFFF_ABCA4C42_5525B742_FFFF0000_01010000_27691300
     fn parse_move(&mut self) -> Operation {
         let player_id = self.parse_u8();
         let unknown_u8_1 = self.parse_u8();
         let unknown_u8_2 = self.parse_u8();
-        let unknown_u32_1 = self.parse_u32_opt();
+        let constant = self.parse_u32();
+
+        assert_eq!(
+            constant, 0xffff_ffff,
+            "expected constant 0xffff_ffff, cursor: {}",
+            self.cursor
+        );
+
         let x = self.parse_f32();
         let y = self.parse_f32();
-        let selected = self.parse_usize_u16_opt();
-        let unknown_u16_1 = self.parse_u16();
+        let selected = self.parse_usize_u8_opt();
         let flags = self.parse_flags(4);
-        let unknown_u32_2 = self.parse_u32();
+        let unknown_u32_1 = self.parse_u32();
         let unit_ids = selected.map(|selected| self.parse_u32s(selected));
 
         Operation::Action(Action::Move(Move {
             player_id,
             unknown_u8_1,
             unknown_u8_2,
-            unknown_u32_1,
             x,
             y,
-            unknown_u16_1,
             flags,
-            unknown_u32_2,
             unit_ids,
+            unknown_u32_1,
         }))
     }
 
@@ -774,37 +770,22 @@ impl Parser {
         }))
     }
 
-    fn parse_release_type(&mut self) -> ReleaseType {
-        let release_type_u32 = self.parse_u32();
-
-        ReleaseType::from(release_type_u32)
-    }
-
-    // Examples:
-    // 01000000_1C000000_6F021800_01000000_000080BF_000080BF_FFFFFFFF_00000000_84380000_B6621600
-    // 01000000_20000000_6F021C00_02000000_000080BF_000080BF_FFFFFFFF_00000000_8F380000_A4380000_577C1800
-    // 01000000_20000000_6F021C00_02000000_000080BF_000080BF_FFFFFFFF_00000000_8F380000_A4380000_A5F31800
     fn parse_release(&mut self) -> Operation {
-        let player_id = self.parse_u8();
-        let unknown_u8_1 = self.parse_u8();
-        let unknown_u8_2 = self.parse_u8();
-        let selected = self.parse_usize_u32();
+        let selected = self.parse_usize_u8();
+        self.skip_u8s(2);
         let x = self.parse_f32();
         let y = self.parse_f32();
-        let unknown_u32_1 = self.parse_u32();
-        let release_type = self.parse_release_type();
-        let unknown_u32_2 = self.parse_u32();
+        let release_type_u8 = self.parse_u8();
+        let release_type = ReleaseType::from(release_type_u8);
+        self.skip_u8s(3);
+        let release_id = self.parse_u32_opt();
         let unit_ids = self.parse_u32s(selected);
 
         Operation::Action(Action::Release(Release {
-            player_id,
-            unknown_u8_1,
-            unknown_u8_2,
             x,
             y,
-            unknown_u32_1,
             release_type,
-            unknown_u32_2,
+            release_id,
             unit_ids,
         }))
     }
@@ -823,48 +804,44 @@ impl Parser {
         }))
     }
 
-    // Examples:
-    // 01000000_15000000_65011100_8E380000_0100C800_FFFFFFFF_008E3800_00085617_00
-    // 01000000_19000000_65011500_2B390000_02006400_FFFFFFFF_00993800_002B3900_0061A516_00
-    //_01000000_11000000_65020D00_1F3A0000_01006200_FFFFFFFF_001BC11B_00
     fn parse_research(&mut self) -> Operation {
+        self.skip_u8s(3);
+        let building_id = self.parse_u32();
         let player_id = self.parse_u8();
-        let selected = (self.parse_usize_u8() - 8) / 4;
-        let unknown_u8_1 = self.parse_u8();
-        let unknown_u32_1 = self.parse_u32();
-        let unknown_u16_1 = self.parse_u16();
-        let unknown_u16_2 = self.parse_u16();
-        let unknown_u32_2 = self.parse_u32_opt();
-        let unknown_u8_2 = self.parse_u8();
-        let unit_ids = self.parse_u32s(selected);
+        self.skip_u8s(1);
+        let check = self.peek_i32();
+
+        let (technology_type, selected_ids) = if check == -1 {
+            let selected = self.parse_usize_u8();
+            self.skip_u8();
+            let technology_type = self.parse_u32();
+            let selected_ids = self.parse_u32s(selected);
+
+            (technology_type, selected_ids)
+        } else {
+            let technology_type = u32::from(self.parse_u16());
+            let selected_ids = self.parse_u32s(1);
+
+            (technology_type, selected_ids)
+        };
 
         Operation::Action(Action::Research(Research {
+            building_id,
             player_id,
-            unknown_u8_1,
-            unknown_u32_1,
-            unknown_u16_1,
-            unknown_u16_2,
-            unknown_u32_2,
-            unknown_u8_2,
-            unit_ids,
+            technology_type,
+            selected_ids,
         }))
     }
 
-    // Examples:
-    // 01000000_05000000_0B010100_004B4A27_00
     fn parse_resign(&mut self) -> Operation {
         let player_id = self.parse_u8();
         let player_num = self.parse_u8();
         let disconnected = self.parse_bool_u8();
-        let unknown_u8_1 = self.parse_u8();
-        let unknown_u32_1 = self.parse_u32();
 
         Operation::Action(Action::Resign(Resign {
             player_id,
             player_num,
             disconnected,
-            unknown_u8_1,
-            unknown_u32_1,
         }))
     }
 
@@ -904,35 +881,24 @@ impl Parser {
     }
 
     fn parse_stance_type(&mut self) -> StanceType {
-        let stance_type_u32 = self.parse_u32();
+        let stance_type_u8 = self.parse_u8();
 
-        StanceType::from(stance_type_u32)
+        StanceType::from(stance_type_u8)
     }
 
-    // Examples:
-    // 01000000_10000000_12020C00_01000000_02000000_A6380000_BC511800
-    // 01000000_10000000_12020C00_01000000_02000000_4C1D0000_F6010000
-    // 01000000_10000000_12020C00_01000000_03000000_4C1D0000_2A730600
     fn parse_stance(&mut self) -> Operation {
-        let player_id = self.parse_u8();
-        let unknown_u8_1 = self.parse_u8();
-        let unknown_u8_2 = self.parse_u8();
-        let selected = self.parse_usize_u32();
+        let selected = self.parse_usize_u8();
         let stance_type = self.parse_stance_type();
-        let unknown_u32_1 = self.parse_u32();
         let unit_ids = self.parse_u32s(selected);
 
         Operation::Action(Action::Stance(Stance {
-            player_id,
-            unknown_u8_1,
-            unknown_u8_2,
             stance_type,
-            unknown_u32_1,
             unit_ids,
         }))
     }
 
     fn parse_stop(&mut self) -> Operation {
+        println!("> {}", self.cursor);
         let player_id = self.parse_u8();
         let unknown_u8_1 = self.parse_u8();
         let unknown_u8_2 = self.parse_u8();
@@ -951,8 +917,6 @@ impl Parser {
         }))
     }
 
-    // Examples:
-    // 02000000_0D000000
     fn parse_sync(&mut self) -> Operation {
         let time_increment = self.parse_u32();
         let next = self.peek_u32();
@@ -979,22 +943,11 @@ impl Parser {
         }
     }
 
-    // Examples:
-    // 01000000_08000000_72010400_D8380000_B92B1E00
     fn parse_toggle_gate(&mut self) -> Operation {
-        let player_id = self.parse_u8();
-        let unknown_u8_1 = self.parse_u8();
-        let unknown_u8_2 = self.parse_u8();
-        let unknown_u32_1 = self.parse_u32();
-        let unknown_u32_2 = self.parse_u32();
+        self.skip_u8s(3);
+        let gate_id = self.parse_u32();
 
-        Operation::Action(Action::ToggleGate(ToggleGate {
-            player_id,
-            unknown_u8_1,
-            unknown_u8_2,
-            unknown_u32_1,
-            unknown_u32_2,
-        }))
+        Operation::Action(Action::ToggleGate(ToggleGate { gate_id }))
     }
 
     // Examples:
@@ -1003,24 +956,17 @@ impl Parser {
         let player_id = self.parse_u8();
         let unknown_u8_1 = self.parse_u8();
         let unknown_u8_2 = self.parse_u8();
-        let unknown_u32_1 = self.parse_u32();
-        let x = self.parse_f32();
-        let y = self.parse_f32();
-        let selected = self.parse_usize_u32();
+        let unknown_u32_1 = self.parse_u32_opt();
         let unknown_u32_2 = self.parse_u32();
-        let unknown_u32_3 = self.parse_u32();
-        let unit_ids = self.parse_u32s(selected);
+        let unknown_u8_3 = self.parse_u8();
 
         Operation::Action(Action::Unknown0x23(Unknown0x23 {
             player_id,
             unknown_u8_1,
             unknown_u8_2,
             unknown_u32_1,
-            x,
-            y,
             unknown_u32_2,
-            unknown_u32_3,
-            unit_ids,
+            unknown_u8_3,
         }))
     }
 
@@ -1171,8 +1117,6 @@ impl Parser {
         self.parse_u8_opt().map(|value| value as usize)
     }
 
-    // Examples:
-    // 03000000_F1D89542_06C08442_01000000
     fn parse_view_lock(&mut self) -> Operation {
         let x = self.parse_f32();
         let y = self.parse_f32();
@@ -1262,6 +1206,10 @@ impl Parser {
 
     fn peek_bool_u32(&self) -> bool {
         self.peek_u32() != 0
+    }
+
+    fn peek_i32(&self) -> i32 {
+        i32::from_le_bytes(self.take_4())
     }
 
     fn peek_u32(&self) -> u32 {

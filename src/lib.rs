@@ -33,7 +33,7 @@
 // Rustdoc lints
 #![deny(rustdoc::all)]
 // Overwrites
-#![allow(clippy::module_name_repetitions)]
+#![allow(clippy::module_name_repetitions, clippy::similar_names)]
 
 pub mod body;
 pub mod body_meta;

@@ -7,8 +7,8 @@ pub enum StanceType {
     Unknown,
 }
 
-impl From<u8> for StanceType {
-    fn from(value: u8) -> Self {
+impl From<u32> for StanceType {
+    fn from(value: u32) -> Self {
         match value {
             0x00 => Self::Aggressive,
             0x01 => Self::Defensive,

@@ -7,8 +7,8 @@ pub enum ReleaseType {
     Selected,
 }
 
-impl From<u8> for ReleaseType {
-    fn from(value: u8) -> Self {
+impl From<u32> for ReleaseType {
+    fn from(value: u32) -> Self {
         match value {
             0 => Self::All,
             3 => Self::Selected,

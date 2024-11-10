@@ -43,9 +43,13 @@ pub enum ActionType {
     ToggleGate,
     TownBell,
     Tribute,
+    Unknown0x23,
+    Unknown0x25,
+    Unknown0x29,
+    Unknown0x82,
+    Unknown0x83,
     Wall,
     Waypoint,
-    Unknown,
 }
 
 impl From<u8> for ActionType {
@@ -71,7 +75,10 @@ impl From<u8> for ActionType {
             0x1f => Self::AiWaypoint,
             0x20 => Self::Chapter,
             0x21 => Self::DeAttackMove,
+            0x23 => Self::Unknown0x23,
+            0x25 => Self::Unknown0x25,
             0x26 => Self::DeAutoScout,
+            0x29 => Self::Unknown0x29,
             0x35 => Self::AiCommand,
             0x64 => Self::AiQueue,
             0x65 => Self::Research,
@@ -86,7 +93,7 @@ impl From<u8> for ActionType {
             0x70 => Self::MultiQueue,
             0x72 => Self::ToggleGate,
             0x73 => Self::Flare,
-            0x75 => Self::Order, // ?
+            0x75 => Self::Order,
             0x77 => Self::Queue,
             0x78 => Self::GatherPoint,
             0x7a => Self::Sell,
@@ -95,8 +102,10 @@ impl From<u8> for ActionType {
             0x7f => Self::TownBell,
             0x80 => Self::BackToWork,
             0x81 => Self::DeQueue,
+            0x82 => Self::Unknown0x82,
+            0x83 => Self::Unknown0x83,
             0xff => Self::PostGame,
-            _ => Self::Unknown,
+            _ => unreachable!("Invalid action type: 0x{value:x}"),
         }
     }
 }

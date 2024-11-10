@@ -28,7 +28,6 @@ pub mod r#move;
 pub mod multi_queue;
 pub mod order;
 pub mod patrol;
-// pub mod post_game;
 pub mod queue;
 pub mod release;
 pub mod repair;
@@ -36,16 +35,22 @@ pub mod research;
 pub mod resign;
 pub mod save;
 pub mod sell;
-// pub mod spec;
+pub mod spec;
 pub mod stance;
 pub mod stop;
 pub mod toggle_gate;
 pub mod town_bell;
 pub mod tribute;
+pub mod unknown_0x23;
+pub mod unknown_0x25;
+pub mod unknown_0x29;
+pub mod unknown_0x82;
+pub mod unknown_0x83;
 pub mod wall;
 pub mod waypoint;
 
 pub use action_type::ActionType;
+use spec::Spec;
 
 pub use {
     add_attribute::AddAttribute,
@@ -76,9 +81,6 @@ pub use {
     multi_queue::MultiQueue,
     order::Order,
     patrol::Patrol,
-};
-// pub use post_game::PostGame;
-pub use {
     queue::Queue,
     r#move::Move,
     release::Release,
@@ -87,14 +89,16 @@ pub use {
     resign::Resign,
     save::Save,
     sell::Sell,
-};
-// pub use spec::Spec;
-pub use {
     stance::Stance,
     stop::Stop,
     toggle_gate::ToggleGate,
     town_bell::TownBell,
     tribute::Tribute,
+    unknown_0x23::Unknown0x23,
+    unknown_0x25::Unknown0x25,
+    unknown_0x29::Unknown0x29,
+    unknown_0x82::Unknown0x82,
+    unknown_0x83::Unknown0x83,
     wall::Wall,
     waypoint::Waypoint,
 };
@@ -138,12 +142,17 @@ pub enum Action {
     Resign(Resign),
     Save(Save),
     Sell(Sell),
-    // Spec(Spec),
+    Spec(Spec),
     Stance(Stance),
     Stop(Stop),
     ToggleGate(ToggleGate),
     TownBell(TownBell),
     Tribute(Tribute),
+    Unknown0x23(Unknown0x23),
+    Unknown0x25(Unknown0x25),
+    Unknown0x29(Unknown0x29),
+    Unknown0x82(Unknown0x82),
+    Unknown0x83(Unknown0x83),
     Wall(Wall),
     Waypoint(Waypoint),
 }
