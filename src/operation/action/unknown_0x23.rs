@@ -7,6 +7,6 @@ pub struct Unknown0x23 {
     pub x: f32,
     pub y: f32,
     pub unknown_u32_2: u32,
-    pub unknown_u32_3: u32,
     pub unit_ids: Vec<u32>,
+    pub unknown_u32_3: u32,
 }

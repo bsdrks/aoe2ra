@@ -14,6 +14,7 @@ pub enum GameActionMode {
     QuickBuild,
     Speed,
     Spy,
+    Unknown0x03,
 }
 
 impl From<u8> for GameActionMode {
@@ -22,6 +23,7 @@ impl From<u8> for GameActionMode {
             0x00 => Self::Diplomacy,
             0x01 => Self::Speed,
             0x02 => Self::InstantBuild,
+            0x03 => Self::Unknown0x03,
             0x04 => Self::QuickBuild,
             0x05 => Self::AlliedVictory,
             0x06 => Self::Cheat,

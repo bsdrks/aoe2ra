@@ -8,6 +8,6 @@ pub struct Interact {
     pub y: f32,
     pub flags: Option<Vec<u8>>,
     pub unknown_u16_1: u16,
-    pub unknown_u32_1: u32,
     pub unit_ids: Option<Vec<u32>>,
+    pub unknown_u32_1: u32,
 }

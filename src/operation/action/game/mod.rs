@@ -13,6 +13,7 @@ pub mod instant_build;
 pub mod quick_build;
 pub mod speed;
 pub mod spy;
+pub mod unknown_0x03;
 
 pub use {
     allied_victory::AlliedVictory,
@@ -30,6 +31,7 @@ pub use {
     quick_build::QuickBuild,
     speed::Speed,
     spy::Spy,
+    unknown_0x03::Unknown0x03,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
@@ -48,4 +50,5 @@ pub enum Game {
     QuickBuild(QuickBuild),
     Speed(Speed),
     Spy(Spy),
+    Unknown0x03(Unknown0x03),
 }

@@ -7,8 +7,8 @@ pub enum FormationType {
     Unknown,
 }
 
-impl From<u8> for FormationType {
-    fn from(value: u8) -> Self {
+impl From<u32> for FormationType {
+    fn from(value: u32) -> Self {
         match value {
             0x02 => Self::Line,
             0x04 => Self::Box,

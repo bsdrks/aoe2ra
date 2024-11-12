@@ -44,15 +44,17 @@ pub mod tribute;
 pub mod unknown_0x23;
 pub mod unknown_0x25;
 pub mod unknown_0x29;
+pub mod unknown_0x2c;
+pub mod unknown_0x2d;
 pub mod unknown_0x82;
 pub mod unknown_0x83;
+pub mod unknown_0x8c;
+pub mod unknown_0xc4;
 pub mod wall;
 pub mod waypoint;
 
-pub use action_type::ActionType;
-use spec::Spec;
-
 pub use {
+    action_type::ActionType,
     add_attribute::AddAttribute,
     ai_command::AiCommand,
     ai_interact::AiInteract,
@@ -89,6 +91,7 @@ pub use {
     resign::Resign,
     save::Save,
     sell::Sell,
+    spec::Spec,
     stance::Stance,
     stop::Stop,
     toggle_gate::ToggleGate,
@@ -97,8 +100,12 @@ pub use {
     unknown_0x23::Unknown0x23,
     unknown_0x25::Unknown0x25,
     unknown_0x29::Unknown0x29,
+    unknown_0x2c::Unknown0x2c,
+    unknown_0x2d::Unknown0x2d,
     unknown_0x82::Unknown0x82,
     unknown_0x83::Unknown0x83,
+    unknown_0x8c::Unknown0x8c,
+    unknown_0xc4::Unknown0xc4,
     wall::Wall,
     waypoint::Waypoint,
 };
@@ -151,8 +158,12 @@ pub enum Action {
     Unknown0x23(Unknown0x23),
     Unknown0x25(Unknown0x25),
     Unknown0x29(Unknown0x29),
+    Unknown0x2c(Unknown0x2c),
+    Unknown0x2d(Unknown0x2d),
     Unknown0x82(Unknown0x82),
     Unknown0x83(Unknown0x83),
+    Unknown0x8c(Unknown0x8c),
+    Unknown0xc4(Unknown0xc4),
     Wall(Wall),
     Waypoint(Waypoint),
 }

@@ -9,6 +9,7 @@ use crate::{
                 GameActionMode,
                 InstantBuild,
                 Speed,
+                Unknown0x03,
             },
             ActionType,
             AddAttribute,
@@ -44,8 +45,12 @@ use crate::{
             Unknown0x23,
             Unknown0x25,
             Unknown0x29,
+            Unknown0x2c,
+            Unknown0x2d,
             Unknown0x82,
             Unknown0x83,
+            Unknown0x8c,
+            Unknown0xc4,
             Wall,
             Waypoint,
         },
@@ -58,7 +63,6 @@ use crate::{
         ViewLock,
     },
     order_type::OrderType,
-    release_type::ReleaseType,
     resource_type::ResourceType,
     stance_type::StanceType,
 };
@@ -149,9 +153,13 @@ impl Parser {
             ActionType::Unknown0x23 => self.parse_unknown_0x23(),
             ActionType::Unknown0x25 => self.parse_unknown_0x25(),
             ActionType::Unknown0x29 => self.parse_unknown_0x29(),
+            ActionType::Unknown0x2c => self.parse_unknown_0x2c(),
+            ActionType::Unknown0x2d => self.parse_unknown_0x2d(),
             ActionType::Unknown0x82 => self.parse_unknown_0x82(),
             ActionType::Unknown0x83 => self.parse_unknown_0x83(),
-            ActionType::Wall => self.parse_wall(length),
+            ActionType::Unknown0x8c => self.parse_unknown_0x8c(),
+            ActionType::Unknown0xc4 => self.parse_unknown_0xc4(),
+            ActionType::Wall => self.parse_wall(),
             ActionType::Waypoint => self.parse_waypoint(),
         };
 
@@ -200,8 +208,8 @@ impl Parser {
             x,
             y,
             flags,
-            unknown_u32_1,
             unit_ids,
+            unknown_u32_1,
         }))
     }
 
@@ -266,27 +274,47 @@ impl Parser {
         }))
     }
 
+    // Examples:
+    // 01000000_20000000_6B051C00_03000000_5515A742_ABEA2C43_00000100_433D0000_923F0000_C7440000_BCBA1600
     fn parse_attack_ground(&mut self) -> Operation {
-        let selected = self.parse_usize_u8();
-        self.skip_u8s(2);
+        let player_id = self.parse_u8();
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let selected = self.parse_usize_u32();
         let x = self.parse_f32();
         let y = self.parse_f32();
         let flags = self.parse_flags(4);
         let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_1 = self.parse_u32();
 
         Operation::Action(Action::AttackGround(AttackGround {
+            player_id,
+            unknown_u8_1,
+            unknown_u8_2,
             x,
             y,
             flags,
             unit_ids,
+            unknown_u32_1,
         }))
     }
 
+    // Examples:
+    // 01000000_08000000_80020400_520B0000_5D3A0300
     fn parse_back_to_work(&mut self) -> Operation {
-        self.skip_u8s(3);
-        let town_center_id = self.parse_u32();
+        let player_id = self.parse_u8();
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let unknown_u32_1 = self.parse_u32();
+        let unknown_u32_2 = self.parse_u32();
 
-        Operation::Action(Action::BackToWork(BackToWork { town_center_id }))
+        Operation::Action(Action::BackToWork(BackToWork {
+            player_id,
+            unknown_u8_1,
+            unknown_u8_2,
+            unknown_u32_1,
+            unknown_u32_2,
+        }))
     }
 
     fn parse_body_meta(&mut self) -> BodyMeta {
@@ -363,8 +391,7 @@ impl Parser {
 
     fn parse_buy(&mut self) -> Operation {
         let player_id = self.parse_u8();
-        let resource_type_u8 = self.parse_u8();
-        let resource_type = ResourceType::from(resource_type_u8);
+        let resource_type = self.parse_resource_type();
         let amount = self.parse_u8();
         self.skip_u8s(4);
 
@@ -385,32 +412,57 @@ impl Parser {
         })
     }
 
+    // Examples:
+    // 01000000_64000000_21026000_02000000_01000101_0000B641_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_55D5D442_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_2C120000_2B120000_C6D61400
+    // 01000000_64000000_21026000_02000000_01000101_ABAAB441_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_ABEAD442_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_2C120000_2B120000_66D81400
+    // 01000000_60000000_21025C00_01000000_01000101_55557641_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_5535BA42_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_2B120000_BFDE1400
     fn parse_de_attack_move(&mut self) -> Operation {
-        let selected = self.parse_usize_u8();
-        let waypoints = self.parse_u16();
+        let player_id = self.parse_u8();
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let selected = self.parse_usize_u32();
+        let flags = self.parse_flags(4);
         let xs = self.parse_f32s(10);
         let ys = self.parse_f32s(10);
         let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_1 = self.parse_u32();
 
         Operation::Action(Action::DeAttackMove(DeAttackMove {
-            waypoints,
+            player_id,
+            unknown_u8_1,
+            unknown_u8_2,
+            flags,
             xs,
             ys,
             unit_ids,
+            unknown_u32_1,
         }))
     }
 
+    // Examples:
+    // 01000000_0C000000_26020800_01000000_96130000_59921600
     fn parse_de_auto_scout(&mut self) -> Operation {
-        let selected = self.parse_usize_u8();
+        let player_id = self.parse_u8();
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let selected = self.parse_usize_u32();
         let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_1 = self.parse_u32();
 
-        Operation::Action(Action::DeAutoScout(DeAutoScout { unit_ids }))
+        Operation::Action(Action::DeAutoScout(DeAutoScout {
+            player_id,
+            unknown_u8_1,
+            unknown_u8_2,
+            unit_ids,
+            unknown_u32_1,
+        }))
     }
 
     // Examples:
     // 01000000_14000000_81011000_01000000_00006D00_53000100_B61D0000_4A040000
     // 01000000_14000000_81011000_01000000_00006D00_53000100_B61D0000_92060000
     // 01000000_14000000_81021000_01000000_00005700_04000100_A4380000_C4B61300
+    // 01000000_14000000_81011000_01000000_00006500_C0010200_130E0000_27A61600
     fn parse_de_queue(&mut self) -> Operation {
         let player_id = self.parse_u8();
         let unknown_u8_1 = self.parse_u8();
@@ -420,8 +472,8 @@ impl Parser {
         let unknown_u16_2 = self.parse_u16();
         let unknown_u16_3 = self.parse_u16();
         let unknown_u16_4 = self.parse_u16();
-        let unknown_u32_1 = self.parse_u32();
         let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_1 = self.parse_u32();
 
         Operation::Action(Action::DeQueue(DeQueue {
             player_id,
@@ -431,20 +483,29 @@ impl Parser {
             unknown_u16_2,
             unknown_u16_3,
             unknown_u16_4,
-            unknown_u32_1,
             unit_ids,
+            unknown_u32_1,
         }))
     }
 
+    // Examples:
+    // 01000000_08000000_6A020400_46140000_45F81A00
+    // 01000000_08000000_6A020400_150E0000_60E81A00
+    // 01000000_08000000_6A020400_4D0E0000_D8450700
+    // 01000000_08000000_6A020400_790E0000_551C0900
     fn parse_delete(&mut self) -> Operation {
-        self.skip_u8s(3);
-        let object_id = self.parse_u32();
         let player_id = self.parse_u8();
-        self.skip_u8s(3);
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let unknown_u32_1 = self.parse_u32();
+        let unknown_u32_2 = self.parse_u32();
 
         Operation::Action(Action::Delete(Delete {
-            object_id,
             player_id,
+            unknown_u8_1,
+            unknown_u8_2,
+            unknown_u32_1,
+            unknown_u32_2,
         }))
     }
 
@@ -466,49 +527,77 @@ impl Parser {
         check_flags(&next).then(|| self.parse_u8s(count))
     }
 
+    // Examples:
+    // 01000000_14000000_73021000_FFFFFFFF_0000B242_00007442_03000001_451F2300
+    // 01000000_1A000000_73051600_FFFFFFFF_00E0C542_5555B340_09000100_01000100_0100C511_0E00
     fn parse_flare(&mut self) -> Operation {
-        self.skip_u8s(7);
-        let player_ids = self.parse_u8s(9);
-        self.skip_u8s(3);
+        let player_id = self.parse_u8();
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let unknown_u32_1 = self.parse_u32_opt();
         let x = self.parse_f32();
         let y = self.parse_f32();
-        let player_id = self.parse_u8();
-        let player_num = self.parse_u8();
-        self.skip_u8s(2);
+        let selected = self.parse_usize_u8();
+        let unknown_u8s_1 = self.parse_u8s(selected);
+        let unknown_u32_2 = self.parse_u32();
 
         Operation::Action(Action::Flare(Flare {
-            player_ids,
+            player_id,
+            unknown_u8_1,
+            unknown_u8_2,
+            unknown_u32_1,
             x,
             y,
-            player_id,
-            player_num,
+            unknown_u8s_1,
+            unknown_u32_2,
         }))
     }
 
+    // Examples:
+    // 01000000_10000000_14020C00_01000000_FF0C0000_6F0B0000_7F8A0300
     fn parse_follow(&mut self) -> Operation {
-        let selected = self.parse_usize_u8();
-        self.skip_u8s(2);
-        let followed_unit_id = self.parse_u32();
+        let player_id = self.parse_u8();
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let selected = self.parse_usize_u32();
+        let unknown_u32_1 = self.parse_u32();
         let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_2 = self.parse_u32();
 
         Operation::Action(Action::Follow(Follow {
-            followed_unit_id,
+            player_id,
+            unknown_u8_1,
+            unknown_u8_2,
+            unknown_u32_1,
             unit_ids,
+            unknown_u32_2,
         }))
     }
 
+    fn parse_formation_type(&mut self) -> FormationType {
+        let formation_type_u32 = self.parse_u32();
+
+        FormationType::from(formation_type_u32)
+    }
+
+    // Examples:
+    // 01000000_18000000_17011400_03000000_04000000_8E0B0000_300E0000_490E0000_99C30E00
     fn parse_formation(&mut self) -> Operation {
-        let selected = self.parse_usize_u8();
         let player_id = self.parse_u8();
-        self.skip_u8();
-        let formation_type_u8 = self.parse_u8();
-        let formation_type = FormationType::from(formation_type_u8);
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let selected = self.parse_usize_u32();
+        let formation_type = self.parse_formation_type();
         let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_1 = self.parse_u32();
 
         Operation::Action(Action::Formation(Formation {
             player_id,
+            unknown_u8_1,
+            unknown_u8_2,
             formation_type,
             unit_ids,
+            unknown_u32_1,
         }))
     }
 
@@ -531,17 +620,42 @@ impl Parser {
             GameActionMode::Cheat => unimplemented!(),
             GameActionMode::DefaultStance => unimplemented!(),
             GameActionMode::Diplomacy => unimplemented!(),
-            GameActionMode::FishTrapQueue => unimplemented!(),
-            GameActionMode::FishTrapAutoQueue => unimplemented!(),
-            GameActionMode::FishTrapUnqueue => unimplemented!(),
-            GameActionMode::QuickBuild => unimplemented!(),
-            GameActionMode::Spy => unimplemented!(),
-            GameActionMode::Speed => self.parse_speed(),
             GameActionMode::FarmAutoQueue => unimplemented!(),
-            GameActionMode::FarmUnqueue => unimplemented!(),
-            GameActionMode::InstantBuild => self.parse_instant_build(),
             GameActionMode::FarmQueue => unimplemented!(),
+            GameActionMode::FarmUnqueue => unimplemented!(),
+            GameActionMode::FishTrapAutoQueue => unimplemented!(),
+            GameActionMode::FishTrapQueue => unimplemented!(),
+            GameActionMode::FishTrapUnqueue => unimplemented!(),
+            GameActionMode::InstantBuild => self.parse_game_instant_build(),
+            GameActionMode::QuickBuild => unimplemented!(),
+            GameActionMode::Speed => self.parse_game_speed(),
+            GameActionMode::Spy => unimplemented!(),
+            GameActionMode::Unknown0x03 => self.parse_game_unknown_0x03(),
         }))
+    }
+
+    // Examples:
+    // 01000000_14000000_67031000_10000000_03000000_00000000_00000000_A0010000
+    fn parse_game_unknown_0x03(&mut self) -> Game {
+        let player_id = self.parse_u8();
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let unknown_u32_1 = self.parse_u32();
+        let unknown_u32_2 = self.parse_u32();
+        let unknown_u32_3 = self.parse_u32();
+        let unknown_u32_4 = self.parse_u32();
+        let unknown_u32_5 = self.parse_u32();
+
+        Game::Unknown0x03(Unknown0x03 {
+            player_id,
+            unknown_u8_1,
+            unknown_u8_2,
+            unknown_u32_1,
+            unknown_u32_2,
+            unknown_u32_3,
+            unknown_u32_4,
+            unknown_u32_5,
+        })
     }
 
     // Examples:
@@ -558,8 +672,8 @@ impl Parser {
         let unknown_u32_2 = self.parse_u32_opt();
         let unknown_u32_3 = self.parse_u32_opt();
         let unknown_u8_3 = self.parse_u8();
-        let unknown_u32_4 = self.parse_u32();
         let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_4 = self.parse_u32();
 
         Operation::Action(Action::GatherPoint(GatherPoint {
             player_id,
@@ -570,20 +684,29 @@ impl Parser {
             unknown_u32_2,
             unknown_u32_3,
             unknown_u8_3,
-            unknown_u32_4,
             unit_ids,
+            unknown_u32_4,
         }))
     }
 
+    // Examples:
+    // 01000000_10000000_13020C00_01000000_0D0C0000_0D0C0000_29270800
     fn parse_guard(&mut self) -> Operation {
-        let selected = self.parse_usize_u8();
-        self.skip_u8s(2);
-        let guarded_unit_id = self.parse_u32();
+        let player_id = self.parse_u8();
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let selected = self.parse_usize_u32();
+        let unknown_u32_1 = self.parse_u32();
         let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_2 = self.parse_u32();
 
         Operation::Action(Action::Guard(Guard {
-            guarded_unit_id,
+            player_id,
+            unknown_u8_1,
+            unknown_u8_2,
+            unknown_u32_1,
             unit_ids,
+            unknown_u32_2,
         }))
     }
 
@@ -604,8 +727,8 @@ impl Parser {
         let selected = self.parse_usize_u16_opt();
         let flags = self.parse_flags(4);
         let unknown_u16_1 = self.parse_u16();
-        let unknown_u32_1 = self.parse_u32();
         let unit_ids = selected.map(|selected| self.parse_u32s(selected));
+        let unknown_u32_1 = self.parse_u32();
 
         Operation::Action(Action::Interact(Interact {
             player_id,
@@ -616,8 +739,8 @@ impl Parser {
             y,
             flags,
             unknown_u16_1,
-            unknown_u32_1,
             unit_ids,
+            unknown_u32_1,
         }))
     }
 
@@ -625,7 +748,7 @@ impl Parser {
     // 01000000_14000000_67021000_0B000000_02000800_00000000_01000000_859C0200
     // 01000000_14000000_67021000_0B000000_02000800_00000000_01000000_59140200
     // 01000000_14000000_67021000_0B000000_02000800_00000000_01000000_1E010200
-    fn parse_instant_build(&mut self) -> Game {
+    fn parse_game_instant_build(&mut self) -> Game {
         let unknown_u16_1 = self.parse_u16();
         let unknown_u32_1 = self.parse_u32();
         let unknown_u16_2 = self.parse_u16();
@@ -661,8 +784,8 @@ impl Parser {
         let selected = self.parse_usize_u16_opt();
         let unknown_u16_1 = self.parse_u16();
         let flags = self.parse_flags(4);
-        let unknown_u32_2 = self.parse_u32();
         let unit_ids = selected.map(|selected| self.parse_u32s(selected));
+        let unknown_u32_2 = self.parse_u32();
 
         Operation::Action(Action::Move(Move {
             player_id,
@@ -673,8 +796,8 @@ impl Parser {
             y,
             unknown_u16_1,
             flags,
-            unknown_u32_2,
             unit_ids,
+            unknown_u32_2,
         }))
     }
 
@@ -717,26 +840,28 @@ impl Parser {
     }
 
     fn parse_order_type(&mut self) -> OrderType {
-        let order_type_u8 = self.parse_u8();
+        let order_type_u32 = self.parse_u32();
 
-        OrderType::from(order_type_u8)
+        OrderType::from(order_type_u32)
     }
 
     // Examples:
     // 01000000_3D000000_75023900_07000000_FFFFFFFF_000080BF_000080BF_FFFFFFFF_00000000_07000001_00481D00_00491D00_004A1D00_00243800_002E3800_00283800_003B3800_00C88D03_00
+    // 01000000_3D000000_75013900_07000000_FFFFFFFF_000080BF_000080BF_FFFFFFFF_00000000_08000001_00690B00_00740D00_007F0D00_00780D00_00610B00_007A0D00_00630B00_008CD001_00
     fn parse_order(&mut self) -> Operation {
         let player_id = self.parse_u8();
         let unknown_u8_1 = self.parse_u8();
         let unknown_u8_2 = self.parse_u8();
-        let selected = self.parse_usize_u8();
+        let selected = self.parse_usize_u32();
         let unknown_u32_1 = self.parse_u32_opt();
         let x = self.parse_f32();
         let y = self.parse_f32();
         let unknown_u32_2 = self.parse_u32_opt();
+        let order_type = self.parse_order_type();
         let unknown_u8_3 = self.parse_u8();
         let unknown_u8_4 = self.parse_u8();
         let unknown_u8_5 = self.parse_u8();
-        let order_type = self.parse_order_type();
+        let unknown_u8_6 = self.parse_u8();
         let unknown_u8_7 = self.parse_u8();
         let unit_ids = self.parse_u32s(selected);
         let unknown_u32_3 = self.parse_u32();
@@ -749,41 +874,53 @@ impl Parser {
             x,
             y,
             unknown_u32_2,
+            order_type,
             unknown_u8_3,
             unknown_u8_4,
             unknown_u8_5,
-            order_type,
+            unknown_u8_6,
             unknown_u8_7,
             unit_ids,
             unknown_u32_3,
         }))
     }
 
+    // Examples:
+    // 01000000_60000000_15035C00_01000000_01000001_AB523C43_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_55755E42_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_E21D0000_E3380C00
     fn parse_patrol(&mut self) -> Operation {
-        let selected = self.parse_usize_u8();
-        let waypoints = self.parse_u16();
+        let player_id = self.parse_u8();
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let selected = self.parse_usize_u32();
+        let unknown_u8_3 = self.parse_u8();
+        let unknown_u8_4 = self.parse_u8();
+        let unknown_u8_5 = self.parse_u8();
+        let unknown_u8_6 = self.parse_u8();
         let xs = self.parse_f32s(10);
         let ys = self.parse_f32s(10);
         let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_1 = self.parse_u32();
 
         Operation::Action(Action::Patrol(Patrol {
-            waypoints,
+            player_id,
+            unknown_u8_1,
+            unknown_u8_2,
+            unknown_u8_3,
+            unknown_u8_4,
+            unknown_u8_5,
+            unknown_u8_6,
             xs,
             ys,
             unit_ids,
+            unknown_u32_1,
         }))
-    }
-
-    fn parse_release_type(&mut self) -> ReleaseType {
-        let release_type_u32 = self.parse_u32();
-
-        ReleaseType::from(release_type_u32)
     }
 
     // Examples:
     // 01000000_1C000000_6F021800_01000000_000080BF_000080BF_FFFFFFFF_00000000_84380000_B6621600
     // 01000000_20000000_6F021C00_02000000_000080BF_000080BF_FFFFFFFF_00000000_8F380000_A4380000_577C1800
     // 01000000_20000000_6F021C00_02000000_000080BF_000080BF_FFFFFFFF_00000000_8F380000_A4380000_A5F31800
+    // 01000000_1C000000_6F031800_01000000_000080BF_000080BF_03000000_01000000_C52A0000_0B0B1E00
     fn parse_release(&mut self) -> Operation {
         let player_id = self.parse_u8();
         let unknown_u8_1 = self.parse_u8();
@@ -792,9 +929,9 @@ impl Parser {
         let x = self.parse_f32();
         let y = self.parse_f32();
         let unknown_u32_1 = self.parse_u32();
-        let release_type = self.parse_release_type();
         let unknown_u32_2 = self.parse_u32();
         let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_3 = self.parse_u32();
 
         Operation::Action(Action::Release(Release {
             player_id,
@@ -803,30 +940,39 @@ impl Parser {
             x,
             y,
             unknown_u32_1,
-            release_type,
             unknown_u32_2,
             unit_ids,
+            unknown_u32_3,
         }))
     }
 
+    // Examples:
+    // 01000000_28000000_6E082400_06000000_C4170000_00000001_FD170000_62780000_ED3C0000_EB3C0000_14180000_40180000_2B162300
     fn parse_repair(&mut self) -> Operation {
-        let selected = self.parse_usize_u8();
-        self.skip_u8s(2);
-        let repaired_id = self.parse_u32();
+        let player_id = self.parse_u8();
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let selected = self.parse_usize_u32();
+        let unknown_u32_1 = self.parse_u32();
         let flags = self.parse_flags(4);
         let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_2 = self.parse_u32();
 
         Operation::Action(Action::Repair(Repair {
-            repaired_id,
+            player_id,
+            unknown_u8_1,
+            unknown_u8_2,
+            unknown_u32_1,
             flags,
             unit_ids,
+            unknown_u32_2,
         }))
     }
 
     // Examples:
     // 01000000_15000000_65011100_8E380000_0100C800_FFFFFFFF_008E3800_00085617_00
     // 01000000_19000000_65011500_2B390000_02006400_FFFFFFFF_00993800_002B3900_0061A516_00
-    //_01000000_11000000_65020D00_1F3A0000_01006200_FFFFFFFF_001BC11B_00
+    // 01000000_11000000_65020D00_1F3A0000_01006200_FFFFFFFF_001BC11B_00
     fn parse_research(&mut self) -> Operation {
         let player_id = self.parse_u8();
         let selected = (self.parse_usize_u8() - 8) / 4;
@@ -852,26 +998,32 @@ impl Parser {
 
     // Examples:
     // 01000000_05000000_0B010100_004B4A27_00
+    // 01000000 05000000 0B020100 00578026 00
     fn parse_resign(&mut self) -> Operation {
         let player_id = self.parse_u8();
-        let player_num = self.parse_u8();
-        let disconnected = self.parse_bool_u8();
         let unknown_u8_1 = self.parse_u8();
+        let disconnected = self.parse_bool_u8();
+        let unknown_u8_2 = self.parse_u8();
         let unknown_u32_1 = self.parse_u32();
 
         Operation::Action(Action::Resign(Resign {
             player_id,
-            player_num,
-            disconnected,
             unknown_u8_1,
+            disconnected,
+            unknown_u8_2,
             unknown_u32_1,
         }))
     }
 
+    fn parse_resource_type(&mut self) -> ResourceType {
+        let resource_type_u8 = self.parse_u8();
+
+        ResourceType::from(resource_type_u8)
+    }
+
     fn parse_sell(&mut self) -> Operation {
         let player_id = self.parse_u8();
-        let resource_type_u8 = self.parse_u8();
-        let resource_type = ResourceType::from(resource_type_u8);
+        let resource_type = self.parse_resource_type();
         let amount = self.parse_u8();
         self.skip_u8s(4);
 
@@ -885,7 +1037,7 @@ impl Parser {
     // Examples:
     // 01000000_14000000_67011000_10000000_01000000_00000000_00000000_1B000000
     // 01000000_14000000_67011000_13000000_01000000_00000000_00000000_1B000000
-    fn parse_speed(&mut self) -> Game {
+    fn parse_game_speed(&mut self) -> Game {
         let unknown_u16_1 = self.parse_u16();
         let unknown_u32_1 = self.parse_u32();
         let unknown_u32_2 = self.parse_u32();
@@ -904,9 +1056,7 @@ impl Parser {
     }
 
     fn parse_stance_type(&mut self) -> StanceType {
-        let stance_type_u32 = self.parse_u32();
-
-        StanceType::from(stance_type_u32)
+        self.parse_u32().into()
     }
 
     // Examples:
@@ -919,35 +1069,35 @@ impl Parser {
         let unknown_u8_2 = self.parse_u8();
         let selected = self.parse_usize_u32();
         let stance_type = self.parse_stance_type();
-        let unknown_u32_1 = self.parse_u32();
         let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_1 = self.parse_u32();
 
         Operation::Action(Action::Stance(Stance {
             player_id,
             unknown_u8_1,
             unknown_u8_2,
             stance_type,
-            unknown_u32_1,
             unit_ids,
+            unknown_u32_1,
         }))
     }
 
+    // Examples:
+    // 01000000_20000000_01011C00_06000000_B30E0000_410F0000_7F0F0000_890F0000_9D0F0000_05100000_E8CD0E00
     fn parse_stop(&mut self) -> Operation {
         let player_id = self.parse_u8();
         let unknown_u8_1 = self.parse_u8();
         let unknown_u8_2 = self.parse_u8();
-        let selected = self.parse_usize_u8();
-        let unknown_u32_1 = self.parse_u32();
-        let target_id = self.parse_u32();
+        let selected = self.parse_usize_u32();
         let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_1 = self.parse_u32();
 
         Operation::Action(Action::Stop(Stop {
             player_id,
             unknown_u8_1,
             unknown_u8_2,
-            unknown_u32_1,
-            target_id,
             unit_ids,
+            unknown_u32_1,
         }))
     }
 
@@ -1008,8 +1158,8 @@ impl Parser {
         let y = self.parse_f32();
         let selected = self.parse_usize_u32();
         let unknown_u32_2 = self.parse_u32();
-        let unknown_u32_3 = self.parse_u32();
         let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_3 = self.parse_u32();
 
         Operation::Action(Action::Unknown0x23(Unknown0x23 {
             player_id,
@@ -1019,8 +1169,8 @@ impl Parser {
             x,
             y,
             unknown_u32_2,
-            unknown_u32_3,
             unit_ids,
+            unknown_u32_3,
         }))
     }
 
@@ -1052,6 +1202,54 @@ impl Parser {
     }
 
     // Examples:
+    // 01000000_0C000000_2C010800_01000000_F00C0000_F44E0E00
+    // 01000000 10000000 2C010C00 02000000 A30C0000 1F120000 A42F1500
+    fn parse_unknown_0x2c(&mut self) -> Operation {
+        let player_id = self.parse_u8();
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let selected = self.parse_usize_u32();
+        let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_1 = self.parse_u32();
+
+        Operation::Action(Action::Unknown0x2c(Unknown0x2c {
+            player_id,
+            unknown_u8_1,
+            unknown_u8_2,
+            unit_ids,
+            unknown_u32_1,
+        }))
+    }
+
+    // Examples:
+    // 01000000_1C000000_2D011800_FFFFFFFF_55858D42_00309842_01000001_01000000_130E0000_F7A61600
+    fn parse_unknown_0x2d(&mut self) -> Operation {
+        let player_id = self.parse_u8();
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let unknown_u32_1 = self.parse_u32_opt();
+        let x = self.parse_f32();
+        let y = self.parse_f32();
+        let flags = self.parse_flags(4);
+        let unknown_u32_2 = self.parse_u32();
+        let unknown_u32_3 = self.parse_u32();
+        let unknown_u32_4 = self.parse_u32();
+
+        Operation::Action(Action::Unknown0x2d(Unknown0x2d {
+            player_id,
+            unknown_u8_1,
+            unknown_u8_2,
+            unknown_u32_1,
+            x,
+            y,
+            flags,
+            unknown_u32_2,
+            unknown_u32_3,
+            unknown_u32_4,
+        }))
+    }
+
+    // Examples:
     // 01000000_0D000000_83020900_01000000_02573700_0016A400_00
     fn parse_unknown_0x83(&mut self) -> Operation {
         let selected = self.parse_usize_u8();
@@ -1071,6 +1269,26 @@ impl Parser {
     }
 
     // Examples:
+    // 01000000_08000000_8C050400_DB170000_7B041E00
+    fn parse_unknown_0x8c(&mut self) -> Operation {
+        let player_id = self.parse_u8();
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let unknown_u32_1 = self.parse_u32();
+        let unknown_u16_1 = self.parse_u16();
+        let unknown_u16_2 = self.parse_u16();
+
+        Operation::Action(Action::Unknown0x8c(Unknown0x8c {
+            player_id,
+            unknown_u8_1,
+            unknown_u8_2,
+            unknown_u32_1,
+            unknown_u16_1,
+            unknown_u16_2,
+        }))
+    }
+
+    // Examples:
     // 01000000 11000000 82020D00 02000000 01C73700 00C83700 002DF60A 00
     // 01000000_0D000000_82020900_01000000_00BC1D00_00859C02_00
     // 01000000_0D000000_82020900_01000000_00BC1D00_007A0A00_00
@@ -1080,16 +1298,56 @@ impl Parser {
         let unknown_u8_2 = self.parse_u8();
         let selected = self.parse_usize_u32();
         let unknown_u8_3 = self.parse_u8();
-        let unknown_u32_1 = self.parse_u32();
         let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_1 = self.parse_u32();
 
         Operation::Action(Action::Unknown0x82(Unknown0x82 {
             player_id,
             unknown_u8_1,
             unknown_u8_2,
             unknown_u8_3,
-            unknown_u32_1,
             unit_ids,
+            unknown_u32_1,
+        }))
+    }
+
+    // Examples:
+    // 01000000_2D000000_C4012900_00000000_00000000_00000000_00000000_9A99993E_9A99993E_9A99993E_9A99993E_01000000_03000200_02A9FF13_00
+    fn parse_unknown_0xc4(&mut self) -> Operation {
+        let player_id = self.parse_u8();
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let unknown_u32_1 = self.parse_u32();
+        let unknown_u32_2 = self.parse_u32();
+        let unknown_u32_3 = self.parse_u32();
+        let unknown_u32_4 = self.parse_u32();
+        let unknown_u32_5 = self.parse_u32();
+        let unknown_u32_6 = self.parse_u32();
+        let unknown_u32_7 = self.parse_u32();
+        let unknown_u32_8 = self.parse_u32();
+        let unknown_u32_9 = self.parse_u32();
+        let unknown_u16_1 = self.parse_u16();
+        let unknown_u16_2 = self.parse_u16();
+        let unknown_u8_3 = self.parse_u8();
+        let unknown_u32_10 = self.parse_u32();
+
+        Operation::Action(Action::Unknown0xc4(Unknown0xc4 {
+            player_id,
+            unknown_u8_1,
+            unknown_u8_2,
+            unknown_u32_1,
+            unknown_u32_2,
+            unknown_u32_3,
+            unknown_u32_4,
+            unknown_u32_5,
+            unknown_u32_6,
+            unknown_u32_7,
+            unknown_u32_8,
+            unknown_u32_9,
+            unknown_u16_1,
+            unknown_u16_2,
+            unknown_u8_3,
+            unknown_u32_10,
         }))
     }
 
@@ -1182,45 +1440,37 @@ impl Parser {
         Operation::ViewLock(ViewLock { x, y, player_id })
     }
 
-    fn parse_wall(&mut self, length: usize) -> Operation {
-        let selected = self.parse_usize_u8();
+    // Examples:
+    // 01000000_20000000_69021C00_01000000_32005B00_31005F00_48000000_FFFFFFFF_00000001_790D0000_9D850800
+    // 01000000_24000000_69012000_02000000_19001400_19001400_48000000_FFFFFFFF_00000001_830D0000_860D0000_343A0800
+    fn parse_wall(&mut self) -> Operation {
         let player_id = self.parse_u8();
-
-        let (start_x, start_y, end_x, end_y, building_id, flags) =
-            if length - 16 - (selected * 4) == 8 {
-                self.skip_u8();
-                let start_x = self.parse_u16();
-                let start_y = self.parse_u16();
-                let end_x = self.parse_u16();
-                let end_y = self.parse_u16();
-                let building_id = self.parse_u32();
-                self.skip_u8s(4);
-                let flags = self.parse_u8s(4);
-
-                (start_x, start_y, end_x, end_y, building_id, flags)
-            } else {
-                let start_x = u16::from(self.parse_u8());
-                let start_y = u16::from(self.parse_u8());
-                let end_x = u16::from(self.parse_u8());
-                let end_y = u16::from(self.parse_u8());
-                self.skip_u8();
-                let building_id = self.parse_u32();
-                self.skip_u8s(4);
-
-                (start_x, start_y, end_x, end_y, building_id, Vec::new())
-            };
-
+        let unknown_u8_1 = self.parse_u8();
+        let unknown_u8_2 = self.parse_u8();
+        let selected = self.parse_usize_u32();
+        let start_x = self.parse_u16();
+        let start_y = self.parse_u16();
+        let end_x = self.parse_u16();
+        let end_y = self.parse_u16();
+        let unknown_u32_2 = self.parse_u32();
+        let unknown_u32_3 = self.parse_u32_opt();
+        let unknown_u32_4 = self.parse_u32();
         let unit_ids = self.parse_u32s(selected);
+        let unknown_u32_5 = self.parse_u32();
 
         Operation::Action(Action::Wall(Wall {
             player_id,
+            unknown_u8_1,
+            unknown_u8_2,
             start_x,
             start_y,
             end_x,
             end_y,
-            building_id,
-            flags,
+            unknown_u32_2,
+            unknown_u32_3,
+            unknown_u32_4,
             unit_ids,
+            unknown_u32_5,
         }))
     }
 
