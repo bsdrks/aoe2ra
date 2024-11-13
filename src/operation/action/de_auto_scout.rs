@@ -19,10 +19,11 @@ impl Parse for DeAutoScout {
         let player_id = parser.u8();
         let unknown_u8_1 = parser.u8();
         let unknown_u8_2 = parser.u8();
-        let unit_ids = parser.u32s(1);
+        let selected = parser.usize32();
+        let unit_ids = parser.u32s(selected);
         let unknown_u32_1 = parser.u32();
 
-        DeAutoScout {
+        Self {
             player_id,
             unknown_u8_1,
             unknown_u8_2,

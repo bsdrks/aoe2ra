@@ -39,7 +39,7 @@ impl Parse for Body {
 
         parser.set_cursor(cursor);
 
-        Body {
+        Self {
             meta: BodyMeta::parse(parser),
             operations: parse_operations(parser),
         }

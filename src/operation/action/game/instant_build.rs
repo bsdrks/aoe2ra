@@ -30,7 +30,7 @@ impl Parse for InstantBuild {
         let unknown_u16_4 = parser.u16();
         let unknown_u16_5 = parser.u16();
 
-        InstantBuild {
+        Self {
             unknown_u16_1,
             unknown_u32_1,
             unknown_u16_2,

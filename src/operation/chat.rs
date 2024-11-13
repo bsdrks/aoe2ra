@@ -14,7 +14,7 @@ impl Parse for Chat {
         let length = parser.usize32();
         let text = parser.u8s(length);
 
-        Chat {
+        Self {
             text: text.into_iter().map(|b| b as char).collect(),
         }
     }

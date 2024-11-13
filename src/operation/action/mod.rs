@@ -178,6 +178,8 @@ impl Parse for Action {
         let cursor_next = parser.cursor + length;
         let action_type = ActionType::parse(parser);
 
+        println!("{}: action_type: {:?}", parser.cursor, action_type);
+
         let action = match action_type {
             ActionType::AddAttribute => AddAttribute::parse(parser).into(),
             ActionType::AiCommand => unimplemented!(),
@@ -215,7 +217,7 @@ impl Parse for Action {
             ActionType::Research => Research::parse(parser).into(),
             ActionType::Resign => Resign::parse(parser).into(),
             ActionType::Save => unimplemented!(),
-            ActionType::Sell => unimplemented!(),
+            ActionType::Sell => Sell::parse(parser).into(),
             ActionType::Spec => unimplemented!(),
             ActionType::Stance => Stance::parse(parser).into(),
             ActionType::Stop => Stop::parse(parser).into(),
@@ -405,6 +407,12 @@ impl From<Research> for Action {
 impl From<Resign> for Action {
     fn from(value: Resign) -> Self {
         Self::Resign(value)
+    }
+}
+
+impl From<Sell> for Action {
+    fn from(value: Sell) -> Self {
+        Self::Sell(value)
     }
 }
 

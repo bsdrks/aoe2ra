@@ -2,17 +2,20 @@ pub mod action;
 pub mod chat;
 pub mod operation_type;
 pub mod sync;
+pub mod unknown_0x06;
 pub mod view_lock;
 
 use crate::parser::{
     Parse,
     Parser,
 };
+
 pub use {
     action::Action,
     chat::Chat,
     operation_type::OperationType,
     sync::Sync,
+    unknown_0x06::Unknown0x06,
     view_lock::ViewLock,
 };
 
@@ -22,6 +25,7 @@ pub enum Operation {
     Chat(Chat),
     r#Sync(r#Sync),
     ViewLock(ViewLock),
+    Unknown0x06(Unknown0x06),
 }
 
 impl Parse for Operation {
@@ -33,6 +37,7 @@ impl Parse for Operation {
             OperationType::Sync => r#Sync::parse(parser).into(),
             OperationType::ViewLock => ViewLock::parse(parser).into(),
             OperationType::Chat => Chat::parse(parser).into(),
+            OperationType::Unknown0x06 => Unknown0x06::parse(parser).into(),
         }
     }
 }
@@ -58,5 +63,11 @@ impl From<r#Sync> for Operation {
 impl From<ViewLock> for Operation {
     fn from(value: ViewLock) -> Self {
         Self::ViewLock(value)
+    }
+}
+
+impl From<Unknown0x06> for Operation {
+    fn from(value: Unknown0x06) -> Self {
+        Self::Unknown0x06(value)
     }
 }

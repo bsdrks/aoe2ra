@@ -18,7 +18,7 @@ impl Parse for AddAttribute {
         let unknown_u8_1 = parser.u8();
         let amount = parser.f32();
 
-        AddAttribute {
+        Self {
             player_id,
             attribute,
             unknown_u8_1,

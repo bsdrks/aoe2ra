@@ -19,7 +19,7 @@ impl Parse for Waypoint {
         let y = parser.f32();
         let unit_ids = selected.map(|selected| parser.u32s(selected));
 
-        Waypoint {
+        Self {
             player_id,
             x,
             y,

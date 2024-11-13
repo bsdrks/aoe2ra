@@ -21,6 +21,10 @@ impl Parser {
         self.cursor += count;
     }
 
+    /// # Panics
+    ///
+    /// Panics if the value is not 0x00 or 0x01.
+    #[must_use]
     pub fn bool32(&mut self) -> bool {
         match self.u32() {
             0x00 => false,
@@ -29,6 +33,9 @@ impl Parser {
         }
     }
 
+    /// # Panics
+    ///
+    /// Panics if the value is not 0x00 or 0x01.
     pub fn bool8(&mut self) -> bool {
         match self.u8() {
             0x00 => false,
@@ -147,14 +154,17 @@ impl Parser {
         ]
     }
 
+    #[must_use]
     pub fn peek_bool_u32(&self) -> bool {
         self.peek_u32() != 0
     }
 
+    #[must_use]
     pub fn peek_u32(&self) -> u32 {
         u32::from_le_bytes(self.take_4())
     }
 
+    #[must_use]
     pub fn peek_u8s(&self, count: usize) -> Vec<u8> {
         self.raw[self.cursor..self.cursor + count].to_vec()
     }

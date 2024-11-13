@@ -31,7 +31,7 @@ impl Parse for AiInteract {
         let unknown_u32_1 = parser.u32();
         let unit_ids = selected.map(|selected| parser.u32s(selected));
 
-        AiInteract {
+        Self {
             player_id,
             unknown_u8_1,
             unknown_u8_2,

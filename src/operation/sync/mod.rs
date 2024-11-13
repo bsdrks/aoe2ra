@@ -22,7 +22,7 @@ impl Sync {
         let next = parser.peek_u32();
         let checksum = (next == 0).then(|| Checksum::parse(parser));
 
-        Sync {
+        Self {
             time_increment,
             checksum,
         }

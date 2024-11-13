@@ -26,12 +26,12 @@ impl Parse for DeAttackMove {
         let unknown_u8_2 = parser.u8();
         let selected = parser.usize32();
         let flags = parser.flags(4);
-        let xs = parser.f32s(selected);
-        let ys = parser.f32s(selected);
+        let xs = parser.f32s(10);
+        let ys = parser.f32s(10);
         let unit_ids = parser.u32s(selected);
         let unknown_u32_1 = parser.u32();
 
-        DeAttackMove {
+        Self {
             player_id,
             unknown_u8_1,
             unknown_u8_2,
@@ -41,5 +41,43 @@ impl Parse for DeAttackMove {
             unit_ids,
             unknown_u32_1,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::hex::hex;
+
+    use super::{
+        DeAttackMove,
+        *,
+    };
+
+    #[test]
+    fn test_parse() {
+        let mut parser = Parser::new(hex("
+              026800 04000000 01000101 55459D42 00000000 00000000 00000000
+            00000000 00000000 00000000 00000000 00000000 00000000 AB8A1F42
+            00000000 00000000 00000000 00000000 00000000 00000000 00000000
+            00000000 00000000 A60A0000 CB0A0000 D30A0000 E40A0000 F88B1000
+        "));
+
+        assert_eq!(
+            DeAttackMove::parse(&mut parser),
+            DeAttackMove {
+                player_id: 2,
+                unknown_u8_1: 104,
+                unknown_u8_2: 0,
+                flags: Some(vec![1, 0, 1, 1]),
+                xs: vec![
+                    78.635_414, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                ],
+                ys: vec![
+                    39.885_418, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                ],
+                unit_ids: vec![2726, 2763, 2771, 2788],
+                unknown_u32_1: 1_084_408,
+            }
+        );
     }
 }

@@ -34,7 +34,7 @@ impl Parse for Release {
         let unit_ids = parser.u32s(selected);
         let unknown_u32_3 = parser.u32();
 
-        Release {
+        Self {
             player_id,
             unknown_u8_1,
             unknown_u8_2,

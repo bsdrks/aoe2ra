@@ -39,6 +39,8 @@ impl Parse for BodyMeta {
             }
         }
 
+        parser.skip(4);
+
         Self {
             log_version,
             checksum_interval,

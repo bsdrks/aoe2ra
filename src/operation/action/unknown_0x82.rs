@@ -27,7 +27,7 @@ impl Parse for Unknown0x82 {
         let unknown_u8_3 = parser.u8();
         let unknown_u32_1 = parser.u32();
 
-        Unknown0x82 {
+        Self {
             player_id,
             unknown_u8_1,
             unknown_u8_2,

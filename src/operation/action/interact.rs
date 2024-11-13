@@ -38,7 +38,7 @@ impl Parse for Interact {
         let unit_ids = selected.map(|selected| parser.u32s(selected));
         let unknown_u32_1 = parser.u32();
 
-        Interact {
+        Self {
             player_id,
             unknown_u8_1,
             unknown_u8_2,

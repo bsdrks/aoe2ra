@@ -1,3 +1,7 @@
+/// # Panics
+///
+/// Panics if the input string is not a valid hex string.
+#[must_use]
 pub fn hex(str: &str) -> Vec<u8> {
     str.trim()
         .replace([' ', '\n'], "")

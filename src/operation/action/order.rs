@@ -47,7 +47,7 @@ impl Parse for Order {
         let unit_ids = parser.u32s(selected);
         let unknown_u32_3 = parser.u32();
 
-        Order {
+        Self {
             player_id,
             unknown_u8_1,
             unknown_u8_2,

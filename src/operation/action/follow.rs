@@ -20,11 +20,12 @@ impl Parse for Follow {
         let player_id = parser.u8();
         let unknown_u8_1 = parser.u8();
         let unknown_u8_2 = parser.u8();
+        let selected = parser.usize32();
         let unknown_u32_1 = parser.u32();
-        let unit_ids = parser.u32s(1);
+        let unit_ids = parser.u32s(selected);
         let unknown_u32_2 = parser.u32();
 
-        Follow {
+        Self {
             player_id,
             unknown_u8_1,
             unknown_u8_2,

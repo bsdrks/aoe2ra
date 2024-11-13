@@ -1,12 +1,22 @@
 use {
-    aoe2ra::parser::Parser,
-    std::fs::read,
+    aoe2ra::{
+        body::Body,
+        parser::{
+            Parse,
+            Parser,
+        },
+    },
+    std::{
+        env::args,
+        fs::read,
+    },
 };
 
 fn main() {
-    let raw = read("./recs/rec12.aoe2record").unwrap();
+    let record_path = args().nth(1).expect("No record path provided");
+    let raw = read(record_path).expect("Failed to read record");
     let mut parser = Parser::new(raw);
-    let body = parser.parse_body();
+    let body = Body::parse(&mut parser);
 
     println!("{:?}", body);
 }

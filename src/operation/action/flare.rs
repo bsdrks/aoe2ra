@@ -26,10 +26,11 @@ impl Parse for Flare {
         let unknown_u32_1 = parser.u32_opt();
         let x = parser.f32();
         let y = parser.f32();
-        let unknown_u8s_1 = parser.u8s(3);
+        let selected = parser.usize8();
+        let unknown_u8s_1 = parser.u8s(selected);
         let unknown_u32_2 = parser.u32();
 
-        Flare {
+        Self {
             player_id,
             unknown_u8_1,
             unknown_u8_2,

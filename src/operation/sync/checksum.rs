@@ -19,7 +19,7 @@ impl Parse for Checksum {
         let checksum = (sequence > 0).then(|| parser.u8s(332));
         parser.skip(8);
 
-        Checksum {
+        Self {
             sync,
             sequence,
             checksum,

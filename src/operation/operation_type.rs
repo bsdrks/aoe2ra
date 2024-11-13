@@ -9,22 +9,41 @@ pub enum OperationType {
     Chat,
     Sync,
     ViewLock,
+    Unknown0x06,
 }
 
-impl From<u32> for OperationType {
-    fn from(value: u32) -> Self {
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct UnknownOperationType {
+    pub value: u32,
+}
+
+impl TryFrom<u32> for OperationType {
+    type Error = UnknownOperationType;
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
-            0x01 => Self::Action,
-            0x02 => Self::Sync,
-            0x03 => Self::ViewLock,
-            0x04 => Self::Chat,
-            _ => unreachable!("Invalid OperationType value: {}", value),
+            0x01 => Ok(Self::Action),
+            0x02 => Ok(Self::Sync),
+            0x03 => Ok(Self::ViewLock),
+            0x04 => Ok(Self::Chat),
+            0x06 => Ok(Self::Unknown0x06),
+            _ => Err(UnknownOperationType { value }),
         }
     }
 }
 
 impl Parse for OperationType {
     fn parse(parser: &mut Parser) -> Self {
-        parser.u32().into()
+        let cursor = parser.cursor;
+
+        match parser.u32().try_into() {
+            Ok(operation_type) => operation_type,
+            Err(unknown_operation_type) => {
+                panic!(
+                    "{cursor} (0x{cursor:x?}): unknown operation type {}",
+                    unknown_operation_type.value
+                );
+            }
+        }
     }
 }

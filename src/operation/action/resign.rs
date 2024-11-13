@@ -14,7 +14,8 @@ pub struct Resign {
 
 // Examples:
 // 01000000_05000000_0B010100_004B4A27_00
-// 01000000 05000000 0B020100 00578026 00
+// 01000000_05000000_0B020100_00578026_00
+// 01000000_05000000_0B020100_00BD9828_00
 impl Parse for Resign {
     fn parse(parser: &mut Parser) -> Self {
         let player_id = parser.u8();
@@ -23,12 +24,38 @@ impl Parse for Resign {
         let unknown_u8_2 = parser.u8();
         let unknown_u32_1 = parser.u32();
 
-        Resign {
+        Self {
             player_id,
             unknown_u8_1,
             disconnected,
             unknown_u8_2,
             unknown_u32_1,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use {
+        super::*,
+        crate::hex::hex,
+    };
+
+    #[test]
+    fn test_resign() {
+        let mut parser = Parser::new(hex("
+            010100 004B4A27 00
+        "));
+
+        assert_eq!(
+            Resign::parse(&mut parser),
+            Resign {
+                player_id: 1,
+                unknown_u8_1: 1,
+                disconnected: false,
+                unknown_u8_2: 0,
+                unknown_u32_1: 2_574_923,
+            }
+        );
     }
 }

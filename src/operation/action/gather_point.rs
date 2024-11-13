@@ -35,7 +35,7 @@ impl Parse for GatherPoint {
         let unit_ids = parser.u32s(selected);
         let unknown_u32_4 = parser.u32();
 
-        GatherPoint {
+        Self {
             player_id,
             unknown_u8_1,
             unknown_u8_2,

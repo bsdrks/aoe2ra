@@ -25,7 +25,7 @@ impl Parse for Speed {
         let unknown_u32_4 = parser.u32();
         let unknown_u32_5 = parser.u32();
 
-        Speed {
+        Self {
             unknown_u16_1,
             unknown_u32_1,
             unknown_u32_2,

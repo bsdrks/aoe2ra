@@ -12,8 +12,8 @@ pub enum ResourceType {
     Unknown,
 }
 
-impl From<u32> for ResourceType {
-    fn from(value: u32) -> Self {
+impl From<u16> for ResourceType {
+    fn from(value: u16) -> Self {
         match value {
             0x00 => Self::Food,
             0x01 => Self::Wood,
@@ -26,6 +26,6 @@ impl From<u32> for ResourceType {
 
 impl Parse for ResourceType {
     fn parse(parser: &mut Parser) -> Self {
-        parser.u32().into()
+        parser.u16().into()
     }
 }
