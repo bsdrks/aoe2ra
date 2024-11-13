@@ -1,3 +1,8 @@
+use crate::parser::{
+    Parse,
+    Parser,
+};
+
 #[derive(Debug, Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum OrderType {
     Garrison,
@@ -14,5 +19,11 @@ impl From<u32> for OrderType {
             0x05 => Self::Garrison,
             _ => Self::Other,
         }
+    }
+}
+
+impl Parse for OrderType {
+    fn parse(parser: &mut Parser) -> Self {
+        parser.u32().into()
     }
 }

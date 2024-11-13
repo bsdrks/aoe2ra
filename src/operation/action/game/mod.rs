@@ -15,6 +15,10 @@ pub mod speed;
 pub mod spy;
 pub mod unknown_0x03;
 
+use crate::parser::{
+    Parse,
+    Parser,
+};
 pub use {
     allied_victory::AlliedVictory,
     cheat::Cheat,
@@ -51,4 +55,37 @@ pub enum Game {
     Speed(Speed),
     Spy(Spy),
     Unknown0x03(Unknown0x03),
+}
+
+// Examples:
+// 01000000_14000000_67011000_10000000_01000000_00000000_00000000_1B000000
+// 01000000_14000000_67021000_0B000000_02000800_00000000_01000000_859C0200
+// 01000000_14000000_67021000_0B000000_02000800_00000000_01000000_7A0A0000
+// 01000000_14000000_67011000_13000000_01000000_00000000_00000000_1B000000
+impl Parse for Game {
+    fn parse(parser: &mut Parser) -> Self {
+        let mode = GameActionMode::parse(parser);
+
+        match mode {
+            GameActionMode::AlliedVictory => unimplemented!(),
+            GameActionMode::Cheat => unimplemented!(),
+            GameActionMode::DefaultStance => unimplemented!(),
+            GameActionMode::Diplomacy => unimplemented!(),
+            GameActionMode::FarmAutoQueue => unimplemented!(),
+            GameActionMode::FarmQueue => unimplemented!(),
+            GameActionMode::FarmUnqueue => unimplemented!(),
+            GameActionMode::FishTrapAutoQueue => unimplemented!(),
+            GameActionMode::FishTrapQueue => unimplemented!(),
+            GameActionMode::FishTrapUnqueue => unimplemented!(),
+            GameActionMode::InstantBuild => {
+                Self::InstantBuild(InstantBuild::parse(parser))
+            }
+            GameActionMode::QuickBuild => unimplemented!(),
+            GameActionMode::Speed => Self::Speed(Speed::parse(parser)),
+            GameActionMode::Spy => unimplemented!(),
+            GameActionMode::Unknown0x03 => {
+                Self::Unknown0x03(Unknown0x03::parse(parser))
+            }
+        }
+    }
 }

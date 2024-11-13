@@ -37,20 +37,8 @@
 
 pub mod body;
 pub mod body_meta;
-pub mod check_flags;
-pub mod formation_type;
+pub mod r#enum;
+pub mod hex;
 pub mod operation;
-pub mod order_type;
 pub mod parser;
-pub mod resource_type;
-pub mod stance_type;
-
-// Unused
-pub mod age;
-pub mod difficulty;
-pub mod player;
-pub mod player_type;
-pub mod release_type;
-pub mod reveal_map;
-pub mod starting_resources;
-pub mod victory_type;
+pub mod record;

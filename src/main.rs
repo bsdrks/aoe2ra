@@ -6,5 +6,7 @@ use {
 fn main() {
     let raw = read("./recs/rec12.aoe2record").unwrap();
     let mut parser = Parser::new(raw);
-    let _body = parser.parse_body();
+    let body = parser.parse_body();
+
+    println!("{:?}", body);
 }

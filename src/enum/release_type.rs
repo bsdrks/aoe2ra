@@ -1,3 +1,8 @@
+use crate::parser::{
+    Parse,
+    Parser,
+};
+
 #[derive(Debug, Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum ReleaseType {
     All,
@@ -17,5 +22,11 @@ impl From<u32> for ReleaseType {
             6 => Self::InverseType,
             _ => unreachable!("Invalid ReleaseType value: {}", value),
         }
+    }
+}
+
+impl Parse for ReleaseType {
+    fn parse(parser: &mut Parser) -> Self {
+        parser.u32().into()
     }
 }

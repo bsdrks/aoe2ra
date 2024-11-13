@@ -1,4 +1,4 @@
-use crate::resource_type::ResourceType;
+use crate::r#enum::ResourceType;
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub struct Tribute {

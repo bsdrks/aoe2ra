@@ -1,3 +1,8 @@
+use crate::parser::{
+    Parse,
+    Parser,
+};
+
 #[derive(Debug, Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum FormationType {
     Box,
@@ -16,5 +21,11 @@ impl From<u32> for FormationType {
             0x08 => Self::Flank,
             _ => Self::Unknown,
         }
+    }
+}
+
+impl Parse for FormationType {
+    fn parse(parser: &mut Parser) -> Self {
+        parser.u32().into()
     }
 }

@@ -1,3 +1,8 @@
+use crate::parser::{
+    Parse,
+    Parser,
+};
+
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum GameActionMode {
     AlliedVictory,
@@ -37,5 +42,11 @@ impl From<u8> for GameActionMode {
             0x14 => Self::DefaultStance,
             _ => unreachable!("Invalid value for GameActionMode: {}", value),
         }
+    }
+}
+
+impl Parse for GameActionMode {
+    fn parse(parser: &mut Parser) -> Self {
+        parser.u8().into()
     }
 }

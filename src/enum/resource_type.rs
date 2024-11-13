@@ -1,3 +1,8 @@
+use crate::parser::{
+    Parse,
+    Parser,
+};
+
 #[derive(Debug, Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum ResourceType {
     Food,
@@ -7,8 +12,8 @@ pub enum ResourceType {
     Unknown,
 }
 
-impl From<u8> for ResourceType {
-    fn from(value: u8) -> Self {
+impl From<u32> for ResourceType {
+    fn from(value: u32) -> Self {
         match value {
             0x00 => Self::Food,
             0x01 => Self::Wood,
@@ -16,5 +21,11 @@ impl From<u8> for ResourceType {
             0x03 => Self::Gold,
             _ => Self::Unknown,
         }
+    }
+}
+
+impl Parse for ResourceType {
+    fn parse(parser: &mut Parser) -> Self {
+        parser.u32().into()
     }
 }

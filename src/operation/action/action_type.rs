@@ -1,3 +1,8 @@
+use crate::parser::{
+    Parse,
+    Parser,
+};
+
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum ActionType {
     AddAttribute,
@@ -115,5 +120,11 @@ impl From<u8> for ActionType {
             0xff => Self::PostGame,
             _ => unreachable!("Invalid action type: 0x{value:x}"),
         }
+    }
+}
+
+impl Parse for ActionType {
+    fn parse(parser: &mut Parser) -> Self {
+        parser.u8().into()
     }
 }
