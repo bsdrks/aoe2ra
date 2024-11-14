@@ -49,7 +49,7 @@ mod tests {
     };
 
     #[test]
-    fn test_buy() {
+    fn test_parse_1() {
         let mut parser = Parser::new(hex("
             010800 00000100 2D0D0000 97AF1600
         "));

@@ -3,33 +3,34 @@ use crate::parser::{
     Parser,
 };
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Unknown0x2c {
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct Action0x8c {
     pub player_id: u8,
     pub unknown_u8_1: u8,
     pub unknown_u8_2: u8,
-    pub unit_ids: Vec<u32>,
     pub unknown_u32_1: u32,
+    pub unknown_u16_1: u16,
+    pub unknown_u16_2: u16,
 }
 
 // Examples:
-// 01000000_0C000000_2C010800_01000000_F00C0000_F44E0E00
-// 01000000 10000000 2C010C00 02000000 A30C0000 1F120000 A42F1500
-impl Parse for Unknown0x2c {
+// 01000000_08000000_8C050400_DB170000_7B041E00
+impl Parse for Action0x8c {
     fn parse(parser: &mut Parser) -> Self {
         let player_id = parser.u8();
         let unknown_u8_1 = parser.u8();
         let unknown_u8_2 = parser.u8();
-        let selected = parser.usize32();
-        let unit_ids = parser.u32s(selected);
         let unknown_u32_1 = parser.u32();
+        let unknown_u16_1 = parser.u16();
+        let unknown_u16_2 = parser.u16();
 
         Self {
             player_id,
             unknown_u8_1,
             unknown_u8_2,
-            unit_ids,
             unknown_u32_1,
+            unknown_u16_1,
+            unknown_u16_2,
         }
     }
 }

@@ -9,7 +9,7 @@ pub enum ResourceType {
     Gold,
     Stone,
     Wood,
-    Unknown,
+    Action,
 }
 
 impl From<u16> for ResourceType {
@@ -19,7 +19,7 @@ impl From<u16> for ResourceType {
             0x01 => Self::Wood,
             0x02 => Self::Stone,
             0x03 => Self::Gold,
-            _ => Self::Unknown,
+            _ => Self::Action,
         }
     }
 }

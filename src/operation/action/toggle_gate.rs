@@ -31,3 +31,29 @@ impl Parse for ToggleGate {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use {
+        super::*,
+        crate::hex::hex,
+    };
+
+    #[test]
+    fn test_parse_1() {
+        let mut parser = Parser::new(hex("
+            010400 D8380000 B92B1E00
+        "));
+
+        assert_eq!(
+            ToggleGate::parse(&mut parser),
+            ToggleGate {
+                player_id: 1,
+                unknown_u8_1: 4,
+                unknown_u8_2: 0,
+                unknown_u32_1: 14552,
+                unknown_u32_2: 1_977_273,
+            }
+        );
+    }
+}

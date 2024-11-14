@@ -1,3 +1,12 @@
+pub mod action_0x23;
+pub mod action_0x25;
+pub mod action_0x29;
+pub mod action_0x2c;
+pub mod action_0x2d;
+pub mod action_0x82;
+pub mod action_0x83;
+pub mod action_0x8c;
+pub mod action_0xc4;
 pub mod action_type;
 pub mod add_attribute;
 pub mod ai_command;
@@ -41,15 +50,6 @@ pub mod stop;
 pub mod toggle_gate;
 pub mod town_bell;
 pub mod tribute;
-pub mod unknown_0x23;
-pub mod unknown_0x25;
-pub mod unknown_0x29;
-pub mod unknown_0x2c;
-pub mod unknown_0x2d;
-pub mod unknown_0x82;
-pub mod unknown_0x83;
-pub mod unknown_0x8c;
-pub mod unknown_0xc4;
 pub mod wall;
 pub mod waypoint;
 
@@ -58,6 +58,15 @@ use crate::parser::{
     Parser,
 };
 pub use {
+    action_0x23::Action0x23,
+    action_0x25::Action0x25,
+    action_0x29::Action0x29,
+    action_0x2c::Action0x2c,
+    action_0x2d::Action0x2d,
+    action_0x82::Action0x82,
+    action_0x83::Action0x83,
+    action_0x8c::Action0x8c,
+    action_0xc4::Action0xc4,
     action_type::ActionType,
     add_attribute::AddAttribute,
     ai_command::AiCommand,
@@ -101,15 +110,6 @@ pub use {
     toggle_gate::ToggleGate,
     town_bell::TownBell,
     tribute::Tribute,
-    unknown_0x23::Unknown0x23,
-    unknown_0x25::Unknown0x25,
-    unknown_0x29::Unknown0x29,
-    unknown_0x2c::Unknown0x2c,
-    unknown_0x2d::Unknown0x2d,
-    unknown_0x82::Unknown0x82,
-    unknown_0x83::Unknown0x83,
-    unknown_0x8c::Unknown0x8c,
-    unknown_0xc4::Unknown0xc4,
     wall::Wall,
     waypoint::Waypoint,
 };
@@ -159,26 +159,25 @@ pub enum Action {
     ToggleGate(ToggleGate),
     TownBell(TownBell),
     Tribute(Tribute),
-    Unknown0x23(Unknown0x23),
-    Unknown0x25(Unknown0x25),
-    Unknown0x29(Unknown0x29),
-    Unknown0x2c(Unknown0x2c),
-    Unknown0x2d(Unknown0x2d),
-    Unknown0x82(Unknown0x82),
-    Unknown0x83(Unknown0x83),
-    Unknown0x8c(Unknown0x8c),
-    Unknown0xc4(Unknown0xc4),
+    Action0x23(Action0x23),
+    Action0x25(Action0x25),
+    Action0x29(Action0x29),
+    Action0x2c(Action0x2c),
+    Action0x2d(Action0x2d),
+    Action0x82(Action0x82),
+    Action0x83(Action0x83),
+    Action0x8c(Action0x8c),
+    Action0xc4(Action0xc4),
     Wall(Wall),
     Waypoint(Waypoint),
 }
 
 impl Parse for Action {
     fn parse(parser: &mut Parser) -> Self {
+        println!("{}", parser.cursor);
         let length = parser.usize32();
         let cursor_next = parser.cursor + length;
         let action_type = ActionType::parse(parser);
-
-        println!("{}: action_type: {:?}", parser.cursor, action_type);
 
         let action = match action_type {
             ActionType::AddAttribute => AddAttribute::parse(parser).into(),
@@ -224,15 +223,15 @@ impl Parse for Action {
             ActionType::ToggleGate => ToggleGate::parse(parser).into(),
             ActionType::TownBell => unimplemented!(),
             ActionType::Tribute => unimplemented!(),
-            ActionType::Unknown0x23 => Unknown0x23::parse(parser).into(),
-            ActionType::Unknown0x25 => Unknown0x25::parse(parser).into(),
-            ActionType::Unknown0x29 => Unknown0x29::parse(parser).into(),
-            ActionType::Unknown0x2c => Unknown0x2c::parse(parser).into(),
-            ActionType::Unknown0x2d => Unknown0x2d::parse(parser).into(),
-            ActionType::Unknown0x82 => Unknown0x82::parse(parser).into(),
-            ActionType::Unknown0x83 => Unknown0x83::parse(parser).into(),
-            ActionType::Unknown0x8c => Unknown0x8c::parse(parser).into(),
-            ActionType::Unknown0xc4 => Unknown0xc4::parse(parser).into(),
+            ActionType::Action0x23 => Action0x23::parse(parser).into(),
+            ActionType::Action0x25 => Action0x25::parse(parser).into(),
+            ActionType::Action0x29 => Action0x29::parse(parser).into(),
+            ActionType::Action0x2c => Action0x2c::parse(parser).into(),
+            ActionType::Action0x2d => Action0x2d::parse(parser).into(),
+            ActionType::Action0x82 => Action0x82::parse(parser).into(),
+            ActionType::Action0x83 => Action0x83::parse(parser).into(),
+            ActionType::Action0x8c => Action0x8c::parse(parser).into(),
+            ActionType::Action0xc4 => Action0xc4::parse(parser).into(),
             ActionType::Wall => Wall::parse(parser).into(),
             ActionType::Waypoint => Waypoint::parse(parser).into(),
         };
@@ -434,57 +433,57 @@ impl From<ToggleGate> for Action {
     }
 }
 
-impl From<Unknown0x23> for Action {
-    fn from(value: Unknown0x23) -> Self {
-        Self::Unknown0x23(value)
+impl From<Action0x23> for Action {
+    fn from(value: Action0x23) -> Self {
+        Self::Action0x23(value)
     }
 }
 
-impl From<Unknown0x25> for Action {
-    fn from(value: Unknown0x25) -> Self {
-        Self::Unknown0x25(value)
+impl From<Action0x25> for Action {
+    fn from(value: Action0x25) -> Self {
+        Self::Action0x25(value)
     }
 }
 
-impl From<Unknown0x29> for Action {
-    fn from(value: Unknown0x29) -> Self {
-        Self::Unknown0x29(value)
+impl From<Action0x29> for Action {
+    fn from(value: Action0x29) -> Self {
+        Self::Action0x29(value)
     }
 }
 
-impl From<Unknown0x2c> for Action {
-    fn from(value: Unknown0x2c) -> Self {
-        Self::Unknown0x2c(value)
+impl From<Action0x2c> for Action {
+    fn from(value: Action0x2c) -> Self {
+        Self::Action0x2c(value)
     }
 }
 
-impl From<Unknown0x2d> for Action {
-    fn from(value: Unknown0x2d) -> Self {
-        Self::Unknown0x2d(value)
+impl From<Action0x2d> for Action {
+    fn from(value: Action0x2d) -> Self {
+        Self::Action0x2d(value)
     }
 }
 
-impl From<Unknown0x82> for Action {
-    fn from(value: Unknown0x82) -> Self {
-        Self::Unknown0x82(value)
+impl From<Action0x82> for Action {
+    fn from(value: Action0x82) -> Self {
+        Self::Action0x82(value)
     }
 }
 
-impl From<Unknown0x83> for Action {
-    fn from(value: Unknown0x83) -> Self {
-        Self::Unknown0x83(value)
+impl From<Action0x83> for Action {
+    fn from(value: Action0x83) -> Self {
+        Self::Action0x83(value)
     }
 }
 
-impl From<Unknown0x8c> for Action {
-    fn from(value: Unknown0x8c) -> Self {
-        Self::Unknown0x8c(value)
+impl From<Action0x8c> for Action {
+    fn from(value: Action0x8c) -> Self {
+        Self::Action0x8c(value)
     }
 }
 
-impl From<Unknown0xc4> for Action {
-    fn from(value: Unknown0xc4) -> Self {
-        Self::Unknown0xc4(value)
+impl From<Action0xc4> for Action {
+    fn from(value: Action0xc4) -> Self {
+        Self::Action0xc4(value)
     }
 }
 

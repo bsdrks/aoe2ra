@@ -59,7 +59,7 @@ mod tests {
     };
 
     #[test]
-    fn test_parse_ai_interact_1() {
+    fn test_parse_1() {
         let mut parser = Parser::new(hex("
               021800 FB360000 FCE3C042 2E6A9942
             01000000 01000000 C21D0000 98130000
@@ -82,7 +82,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_ai_interact_2() {
+    fn test_parse_2() {
         let mut parser = Parser::new(hex("
               021800 A00E0000 00004242 00009142
             01000000 01000000 993A0000 E6572C00

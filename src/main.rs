@@ -1,6 +1,10 @@
 use {
     aoe2ra::{
         body::Body,
+        operation::{
+            Action,
+            Operation,
+        },
         parser::{
             Parse,
             Parser,
@@ -18,5 +22,17 @@ fn main() {
     let mut parser = Parser::new(raw);
     let body = Body::parse(&mut parser);
 
-    println!("{:?}", body);
+    println!("{:?}", body.operations.len());
+
+    let actions = body
+        .operations
+        .iter()
+        .filter(|operation| {
+            matches!(operation, Operation::Action(Action::Build(_)))
+        })
+        .collect::<Vec<_>>();
+
+    for action in actions {
+        println!("{:?}", action);
+    }
 }

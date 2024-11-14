@@ -9,7 +9,7 @@ pub enum FormationType {
     Flank,
     Line,
     Staggered,
-    Unknown,
+    Action,
 }
 
 impl From<u32> for FormationType {
@@ -19,7 +19,7 @@ impl From<u32> for FormationType {
             0x04 => Self::Box,
             0x06 => Self::Staggered,
             0x08 => Self::Flank,
-            _ => Self::Unknown,
+            _ => Self::Action,
         }
     }
 }

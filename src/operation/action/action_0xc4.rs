@@ -4,7 +4,7 @@ use crate::parser::{
 };
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Unknown0xc4 {
+pub struct Action0xc4 {
     pub player_id: u8,
     pub unknown_u8_1: u8,
     pub unknown_u8_2: u8,
@@ -25,7 +25,7 @@ pub struct Unknown0xc4 {
 
 // Examples:
 // 01000000_2D000000_C4012900_00000000_00000000_00000000_00000000_9A99993E_9A99993E_9A99993E_9A99993E_01000000_03000200_02A9FF13_00
-impl Parse for Unknown0xc4 {
+impl Parse for Action0xc4 {
     fn parse(parser: &mut Parser) -> Self {
         let player_id = parser.u8();
         let unknown_u8_1 = parser.u8();

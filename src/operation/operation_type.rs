@@ -9,16 +9,16 @@ pub enum OperationType {
     Chat,
     Sync,
     ViewLock,
-    Unknown0x06,
+    Operation0x06,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct UnknownOperationType {
+pub struct ActionOperationType {
     pub value: u32,
 }
 
 impl TryFrom<u32> for OperationType {
-    type Error = UnknownOperationType;
+    type Error = ActionOperationType;
 
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
@@ -26,8 +26,8 @@ impl TryFrom<u32> for OperationType {
             0x02 => Ok(Self::Sync),
             0x03 => Ok(Self::ViewLock),
             0x04 => Ok(Self::Chat),
-            0x06 => Ok(Self::Unknown0x06),
-            _ => Err(UnknownOperationType { value }),
+            0x06 => Ok(Self::Operation0x06),
+            _ => Err(ActionOperationType { value }),
         }
     }
 }

@@ -54,7 +54,7 @@ mod tests {
     };
 
     #[test]
-    fn test_parse() {
+    fn test_parse_1() {
         let mut parser = Parser::new(hex("
               026800 04000000 01000101 55459D42 00000000 00000000 00000000
             00000000 00000000 00000000 00000000 00000000 00000000 AB8A1F42

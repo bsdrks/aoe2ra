@@ -4,7 +4,7 @@ use crate::parser::{
 };
 
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
-pub struct Unknown0x2d {
+pub struct Action0x2d {
     pub player_id: u8,
     pub unknown_u8_1: u8,
     pub unknown_u8_2: u8,
@@ -22,7 +22,7 @@ pub struct Unknown0x2d {
 // Examples:
 // 01000000_1C000000_2D011800_FFFFFFFF_55858D42_00309842_01000001_01000000_130E0000_F7A61600
 // 01000000_24000000_2D022000_FFFFFFFF_AB8A6442_00B0BC42_03000001_01000000_630A0000_FD100000_01110000_0CB42100
-impl Parse for Unknown0x2d {
+impl Parse for Action0x2d {
     fn parse(parser: &mut Parser) -> Self {
         let player_id = parser.u8();
         let unknown_u8_1 = parser.u8();
@@ -58,7 +58,7 @@ impl Parse for Unknown0x2d {
 #[cfg(test)]
 mod tests {
     use {
-        super::Unknown0x2d,
+        super::Action0x2d,
         crate::{
             hex::hex,
             parser::{
@@ -76,8 +76,8 @@ mod tests {
         "));
 
         assert_eq!(
-            Unknown0x2d::parse(&mut parser),
-            Unknown0x2d {
+            Action0x2d::parse(&mut parser),
+            Action0x2d {
                 player_id: 1,
                 unknown_u8_1: 24,
                 unknown_u8_2: 0,

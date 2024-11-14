@@ -42,7 +42,7 @@ mod tests {
     };
 
     #[test]
-    fn test_resign() {
+    fn test_parse_1() {
         let mut parser = Parser::new(hex("
             010100 004B4A27 00
         "));
